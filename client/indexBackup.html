@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caredesk</title>
+  <link rel="stylesheet" href="css/style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+
+    </style>
+    
+  
+   <!-- Open Graph Tags -->
+<meta property="og:title" content="{{ blogTitle }}" />
+<meta property="og:description" content="{{ blogPreviewText }}" />
+<meta property="og:image" content="{{ blogImageUrl }}" />
+<meta property="og:url" content="{{ blogUrl }}" />
+<meta property="og:type" content="article" />
+
+<!-- Twitter Card Tags -->
+<meta name="twitter:title" content="{{ blogTitle }}" />
+<meta name="twitter:description" content="{{ blogPreviewText }}" />
+<meta name="twitter:image" content="{{ blogImageUrl }}" />
+<meta name="twitter:card" content="summary_large_image" />
+
+
+  
+</head>
+
+<body>
+
+   <div id="dark-mode-toggle" class="floating-toggle" title="Toggle Dark Mode">
+    <span id="toggle-icon">🌞</span>
+  </div>
+   
+
+  <header>
+    <div class="container">
+      <h1>Caredesk</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="about.html">Help</a>
+        <a href="contact-us.html">Special Link</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="search-section">
+    <div class="container">
+      <input type="text" id="search-bar" placeholder="Search blogs by title..." />
+    </div>
+  </section>
+
+  <main>
+
+    <div id="categories">
+      <a href="#" data-category="All"></a>
+      <a href="#" data-category="All"></a>
+
+      <hr style="size:8px;color: white;">
+      
+      <a href="#" data-category="Trending">Trending</a>
+      <a href="#" data-category="Breaking News">Breaking News</a>
+
+      <hr style="size:8px;color: white;">
+
+      <a href="#" data-category="Science Fiction">Science Fiction</a>
+      <a href="#" data-category="Games">Games</a>
+      <a href="#" data-category="Crime">Crime</a>
+
+      <hr style="size:8px;color: white;">
+
+      <a href="#" data-category="Nyaluchu">Nyaluchu</a>
+ 
+    </div>
+
+
+    
+    <div class="container">
+      <section id="blogs" class="blogs-container"></section>
+    </div>
+
+
+  </main>
+
+
+  <footer class="footer">
+    <div class="footer-container">
+
+        <div class="footer-column">
+            <h4>Company Info</h4>
+            <ul>
+                <li><a href="contact-us.html">About Us</a></li>
+                <li><a href="contact-us.html">Careers</a></li>
+                <li><a href="contact-us.html">Privacy Policy</a></li>
+                <li><a href="contact-us.html">Terms of Service</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-column">
+            <h4>Services</h4>
+            <ul>
+                <li><a href="contact-us.html">Blogging</a></li>
+                <li><a href="contact-us.html">Consulting</a></li>
+                <li><a href="contact-us.html">SEO Services</a></li>
+                <li><a href="contact-us.html">Content Creation</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-column">
+            <h4>Community Links</h4>
+            <ul>
+                <li><a href="contact-us.html">Forums</a></li>
+                <li><a href="contact-us.html">Support</a></li>
+                <li><a href="contact-us.html">Feedback</a></li>
+                <li><a href="contact-us.html">Events</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-column">
+            <h4>Social Media</h4>
+            <div class="social-links">
+                <a href="#" class="social-icon">Twitter</a>
+                <a href="#" class="social-icon">LinkedIn</a>
+                <a href="#" class="social-icon">YouTube</a>
+                <a href="#" class="social-icon">TikTok</a>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="newsletter-section">
+        <h3>Stay Updated</h3>
+        <form class="newsletter-form">
+            <input type="email" placeholder="Enter your email" required>
+            <button type="submit">Subscribe</button>
+        </form>
+    </div>
+       <a href="#" class="back-to-top">Back to Top</a>
+
+    <div class="footer-bottom">
+        <p>&copy; 2025 Caredesk. All rights reserved.</p>
+    </div>
+</footer>
+
+
+
+
+
+  <script src="js/categories.js"></script>
+  <script src="js/darkMode.js"></script>
+  <script src="js/client.js"></script>
+
+</body>
+
+</html>

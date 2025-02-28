@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caredesk</title>
+    <style>
+      
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'CustomFont', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 1rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        section h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #212121;
+        }
+
+        .help-card {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            position: relative;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+            overflow: hidden;
+            max-width: 100%;
+        }
+
+        .help-card:hover {
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .help-card .icon {
+            font-size: 3rem;
+            color: #f0c14b;
+            margin-bottom: 1rem;
+        }
+
+        .help-card p {
+            font-size: 1.1rem;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            max-height: none;
+            overflow: auto;
+        }
+
+        .help-card .read-more {
+            font-size: 1.1rem;
+            color: #f0c14b;
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.3s ease;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .help-card .read-more:hover {
+            color: #c78e22;
+            transform: translateX(5px);
+        }
+
+        .btn-toggle {
+            padding: 0.75rem 1.5rem;
+            background-color: #f0c14b;
+            color: #333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-toggle:hover {
+            background-color: #c78e22;
+        }
+
+        .dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .help-card {
+            background-color: #1e1e1e;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .dark-mode .btn-toggle {
+            background-color: #444;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .btn-toggle:hover {
+            background-color: #666;
+        }
+
+        footer {
+  background-color: #ffffff;
+  color: #000000;
+  padding: 30px 20px;
+  font-family: Arial, sans-serif;
+  position: relative;
+}
+
+.footer-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.footer-column {
+  flex: 1 1 200px;
+  margin: 15px;
+}
+
+.footer-column h4 {
+  margin-bottom: 10px;
+  font-size: 1.2em;
+  border-bottom: 1px solid #ffd900;
+  padding-bottom: 5px;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-column ul li {
+  margin: 10px 0;
+}
+
+.footer-column a {
+  color: #000000;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-column a:hover {
+  color: #ffaa00;
+}
+
+.newsletter-section {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.newsletter-form {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.newsletter-form input[type="email"] {
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  width: 250px; /* Responsive Width */
+}
+
+.newsletter-form button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #ffaa00;
+  color: #000000;
+  cursor: pointer;
+  margin-left: 5px;
+  transition: background-color 0.3s;
+}
+
+.newsletter-form button:hover {
+  background-color: #00aaff;
+}
+
+.back-to-top {
+  display: block;
+  text-align: center;
+  margin-top: 15px;
+  color: #f4b302;
+  text-decoration: none;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .footer-container {
+      flex-direction: column;
+      align-items: center;
+  }
+
+  .footer-column {
+      flex: 1;
+      text-align: center;
+  }
+
+  .newsletter-form {
+      flex-direction: column;
+  }
+
+  .newsletter-form input[type="email"] {
+      width: 100%;
+      margin-bottom: 10px;
+  }
+}
+
+
+        @media (max-width: 768px) {
+            section h2 {
+                font-size: 1.8rem;
+            }
+
+            .help-card p {
+                font-size: 1rem;
+            }
+
+            .container {
+                padding: 0 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>How to Navigate Our Website</h1>
+    </header>
+
+    <div class="container">
+        <!-- Step 1 -->
+        <section id="step1">
+            <h2>1. Toggle Dark and Light Mode</h2>
+            <div class="help-card">
+                <div class="icon">🌙</div>
+                <p id="step1-text">Switch between dark and light modes to adjust the website's theme according to your preference.Refreshing your browser also helps with switching between light and dark themes. This helps you customize your experience based on lighting conditions or personal preference.</p>
+
+                <span class="read-more">Read More</span>
+            </div>
+        </section>
+
+        <!-- Step 2 -->
+        <section id="step2">
+            <h2>2. Collapse the Dashboard</h2>
+            <div class="help-card">
+                <div class="icon">📊</div>
+                <p id="step2-text">toggle the dashboard section using the dark/light mode button at will, you can collapse it to save space and focus on other parts of the website. This feature makes it easy to navigate without distractions and improves your workflow.</p>
+                <span class="read-more">Read More</span>
+            </div>
+        </section>
+
+        <!-- Step 3 -->
+        <section id="step3">
+            <h2>3. Get Help or Advice</h2>
+            <div class="help-card">
+                <div class="icon">💬</div>
+                <p id="step3-text">If you need help or have any questions, you can always reach out to us. We are here to assist you! Feel free to ask for advice or more information at any time.</p>
+                <span class="read-more">Read More</span>
+                <p><a href="mailto:nia.team.developers@gmail.com">Email us for support</a></p>
+                <p>Or connect via WhatsApp: <a href="https://wa.me/2547115704063">Chat with us</a></p>
+            </div>
+        </section>
+
+        <!-- Step 4 -->
+        <section id="step4">
+            <h2>4. Explore Other Features</h2>
+            <div class="help-card">
+                <div class="icon">🔍</div>
+                <p id="step4-text">Browse through the website to discover various features and updates, ensuring you make the most out of your experience. Don’t hesitate to explore new tools and stay updated on our latest offerings.</p>
+                <span class="read-more">Read More</span>
+                <p>Feel free to explore, ask questions, and provide feedback!</p>
+            </div>
+        </section>
+    </div>
+
+    
+        <p>Have more questions? <a href="mailto:nia.team.developers@gmail.com">Contact us</a></p>
+        <footer class="footer">
+            <div class="footer-container">
+        
+                <div class="footer-column">
+                    <h4>Company Info</h4>
+                    <ul>
+                        <li><a href="contact-us.html">About Us</a></li>
+                        <li><a href="contact-us.html">Careers</a></li>
+                        <li><a href="contact-us.html">Privacy Policy</a></li>
+                        <li><a href="contact-us.html">Terms of Service</a></li>
+                    </ul>
+                </div>
+        
+                <div class="footer-column">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="contact-us.html">Blogging</a></li>
+                        <li><a href="contact-us.html">Consulting</a></li>
+                        <li><a href="contact-us.html">SEO Services</a></li>
+                        <li><a href="contact-us.html">Content Creation</a></li>
+                    </ul>
+                </div>
+        
+                <div class="footer-column">
+                    <h4>Community Links</h4>
+                    <ul>
+                        <li><a href="contact-us.html">Forums</a></li>
+                        <li><a href="contact-us.html">Support</a></li>
+                        <li><a href="contact-us.html">Feedback</a></li>
+                        <li><a href="contact-us.html">Events</a></li>
+                    </ul>
+                </div>
+        
+                <div class="footer-column">
+                    <h4>Social Media</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-icon">Twitter</a>
+                        <a href="#" class="social-icon">LinkedIn</a>
+                        <a href="#" class="social-icon">YouTube</a>
+                        <a href="#" class="social-icon">TikTok</a>
+                    </div>
+                </div>
+        
+            </div>
+        
+            <div class="newsletter-section">
+                <h3>Stay Updated</h3>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Enter your email" required>
+                    <button type="submit">Subscribe</button>
+                </form>
+            </div>
+
+            
+            <a href="#" class="back-to-top">Back to Top</a>
+            <a href="admin-login.html" class="back-to-top">login</a>
+            <div class="footer-bottom">
+                <p>Have more questions? <a href="mailto:support@website.com">Contact us</a></p>
+
+                <p>&copy; 2025 Caredesk. All rights reserved.</p>
+            </div>
+        
+    </footer>
+
+    <script src="js/about.js"></script>
+
+</body>
+</html>

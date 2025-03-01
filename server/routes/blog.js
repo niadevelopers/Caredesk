@@ -1,76 +1,57 @@
 const express = require('express');
 const multer = require('multer');
+const { v2: cloudinary } = require('cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const Blog = require('../models/Blog');
 
 const router = express.Router();
 
-// ✅ Configure multer for uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Store all files in "uploads/" folder
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
+// ✅ Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME, 
+  api_key: process.env.CLOUD_API_KEY, 
+  api_secret: process.env.CLOUD_API_SECRET
 });
 
-const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'video/mp4'];
-    if (!allowedTypes.includes(file.mimetype)) {
-      console.error(`Unsupported file type: ${file.mimetype}`);
-      return cb(new Error('Only JPEG, PNG images, and MP4 videos are allowed.'));
-    }
-    cb(null, true);
-  },
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max file size
-});
-
-//  Create a new blog post
-router.post(
-  '/create',
-  upload.fields([
-    { name: 'image', maxCount: 1 },
-    { name: 'video', maxCount: 1 },
-  ]),
-  async (req, res) => {
-    try {
-      const title = req.body.title?.trim();
-      const content = req.body.content?.trim();
-      const category = req.body.category?.trim();
-
-      // ✅ Validate required fields
-      if (!title || !content || !category) {
-        return res.status(400).json({ error: 'Title, content, and category are required.' });
-      }
-
-      // ✅ Process uploaded files
-      const image = req.files['image'] ? `/uploads/${req.files['image'][0].filename}` : null;
-      const video = req.files['video'] ? `/uploads/${req.files['video'][0].filename}` : null;
-
-      if (!image && !video) {
-        return res.status(400).json({ error: 'At least one media file (image or video) is required.' });
-      }
-
-      // ✅ Create and save the blog post
-      const newBlog = new Blog({
-        title,
-        content,
-        category,
-        image,
-        video,
-        likes: 0, // Default likes count
-      });
-      await newBlog.save();
-
-      res.status(201).json({ message: 'Blog created successfully.', blog: newBlog });
-    } catch (err) {
-      console.error('Error creating blog post:', err.message);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+// ✅ Set up Cloudinary storage for multer
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    return {
+      folder: 'caredesk-blogs',
+      resource_type: file.mimetype.includes('video') ? 'video' : 'image',
+      allowed_formats: ['jpg', 'png', 'mp4']
+    };
   }
-);
+});
+
+const upload = multer({ storage });
+
+// ✅ Create a new blog post with Cloudinary image/video
+router.post('/create', upload.single('media'), async (req, res) => {
+  try {
+    const { title, content, category } = req.body;
+    if (!title || !content || !category) {
+      return res.status(400).json({ error: 'Title, content, and category are required.' });
+    }
+
+    // ✅ Use Cloudinary URL instead of local storage path
+    const mediaUrl = req.file ? req.file.path : null;
+
+    if (!mediaUrl) {
+      return res.status(400).json({ error: 'At least one media file (image or video) is required.' });
+    }
+
+    // ✅ Save blog to database
+    const newBlog = new Blog({ title, content, category, image: mediaUrl, video: mediaUrl, likes: 0 });
+    await newBlog.save();
+
+    res.status(201).json({ message: 'Blog created successfully.', blog: newBlog });
+  } catch (err) {
+    console.error('Error creating blog post:', err.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // ✅ Fetch first 15 blogs (for initial page load)
 router.get('/first-blogs', async (req, res) => {
@@ -86,7 +67,7 @@ router.get('/first-blogs', async (req, res) => {
 // ✅ Fetch more blogs in batches
 router.get('/more-blogs', async (req, res) => {
   try {
-    const { skip = 15 } = req.query; // Start fetching after first 15
+    const { skip = 15 } = req.query;
     const limit = 15;
 
     const blogs = await Blog.find().sort({ createdAt: -1 }).skip(Number(skip)).limit(limit);
@@ -152,7 +133,7 @@ router.post('/like/:id', async (req, res) => {
   }
 });
 
-// ✅ Generate a shareable blog link
+// ✅ Generate a shareable blog link with the correct frontend URL
 router.get('/share/:id', async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
@@ -161,7 +142,9 @@ router.get('/share/:id', async (req, res) => {
     }
 
     const previewText = blog.content ? blog.content.substring(0, 40) + "..." : "Check out this blog!";
-    const blogUrl = `${req.protocol}://${req.get('host')}/blog.html?id=${blog._id}`;
+    
+    // ✅ Ensure the frontend URL is used instead of the backend URL
+    const blogUrl = `https://caredesk.site/blog.html?id=${blog._id}`;
 
     res.status(200).json({ blogUrl, previewText });
   } catch (err) {

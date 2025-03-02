@@ -1,57 +1,53 @@
 const express = require('express');
 const multer = require('multer');
-const { v2: cloudinary } = require('cloudinary');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const Blog = require('../models/Blog');
 
 const router = express.Router();
 
-// ✅ Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME, 
-  api_key: process.env.CLOUD_API_KEY, 
-  api_secret: process.env.CLOUD_API_SECRET
-});
-
-// ✅ Set up Cloudinary storage for multer
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => {
-    return {
-      folder: 'caredesk-blogs',
-      resource_type: file.mimetype.includes('video') ? 'video' : 'image',
-      allowed_formats: ['jpg', 'png', 'mp4']
-    };
-  }
-});
-
-const upload = multer({ storage });
-
-// ✅ Create a new blog post with Cloudinary image/video
-router.post('/create', upload.single('media'), async (req, res) => {
+// ✅ Create a new blog post (Fix: Correct Validation for Media URLs)
+router.post('/create', async (req, res) => {
   try {
-    const { title, content, category } = req.body;
+    const { title, content, category, image, video } = req.body;
+
+    // ✅ Validate required fields
     if (!title || !content || !category) {
       return res.status(400).json({ error: 'Title, content, and category are required.' });
     }
 
-    // ✅ Use Cloudinary URL instead of local storage path
-    const mediaUrl = req.file ? req.file.path : null;
-
-    if (!mediaUrl) {
-      return res.status(400).json({ error: 'At least one media file (image or video) is required.' });
+    // ✅ Ensure either an image OR a video is provided (Fix: Correct logic)
+    if (!image?.trim() && !video?.trim()) {
+      return res.status(400).json({ error: 'Either an image URL or a video URL is required.' });
     }
 
-    // ✅ Save blog to database
-    const newBlog = new Blog({ title, content, category, image: mediaUrl, video: mediaUrl, likes: 0 });
-    await newBlog.save();
+    // ✅ Validate URL format
+    const validURL = (url) => url && /^(https?:\/\/)/.test(url);
 
+    if (image && !validURL(image)) {
+      return res.status(400).json({ error: 'Invalid image URL. Ensure it starts with "http" or "https".' });
+    }
+
+    if (video && !validURL(video)) {
+      return res.status(400).json({ error: 'Invalid video URL. Ensure it starts with "http" or "https".' });
+    }
+
+    // ✅ Save the blog with the provided URLs
+    const newBlog = new Blog({
+      title,
+      content,
+      category,
+      image: image?.trim() || null,  // Store only if provided
+      video: video?.trim() || null,  // Store only if provided
+      likes: 0,
+    });
+
+    await newBlog.save();
     res.status(201).json({ message: 'Blog created successfully.', blog: newBlog });
   } catch (err) {
     console.error('Error creating blog post:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 // ✅ Fetch first 15 blogs (for initial page load)
 router.get('/first-blogs', async (req, res) => {
@@ -67,7 +63,7 @@ router.get('/first-blogs', async (req, res) => {
 // ✅ Fetch more blogs in batches
 router.get('/more-blogs', async (req, res) => {
   try {
-    const { skip = 15 } = req.query;
+    const { skip = 15 } = req.query; // Start fetching after first 15
     const limit = 15;
 
     const blogs = await Blog.find().sort({ createdAt: -1 }).skip(Number(skip)).limit(limit);
@@ -133,7 +129,8 @@ router.post('/like/:id', async (req, res) => {
   }
 });
 
-// ✅ Generate a shareable blog link with the correct frontend URL
+
+// ✅ Generate a shareable blog link with correct frontend domain & media preview
 router.get('/share/:id', async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
@@ -141,17 +138,28 @@ router.get('/share/:id', async (req, res) => {
       return res.status(404).json({ error: 'Blog not found.' });
     }
 
-    const previewText = blog.content ? blog.content.substring(0, 40) + "..." : "Check out this blog!";
-    
-    // ✅ Ensure the frontend URL is used instead of the backend URL
+    // ✅ Strip HTML tags from the preview text
+    const previewText = blog.content 
+      ? blog.content.replace(/(<([^>]+)>)/gi, "").substring(0, 40) + "..." 
+      : "Check out this blog!";
+
+    // ✅ Use the correct frontend domain instead of backend
     const blogUrl = `https://caredesk.site/blog.html?id=${blog._id}`;
 
-    res.status(200).json({ blogUrl, previewText });
+    // ✅ Select the correct media preview (image or video thumbnail)
+    let mediaPreview = blog.image || blog.video;
+    if (blog.video) {
+      mediaPreview += "#t=0,6"; // Show first 6 seconds of the video preview
+    }
+
+    res.status(200).json({ blogUrl, previewText, mediaPreview });
   } catch (err) {
     console.error('Error generating share link:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
 
 // ✅ Delete a blog
 router.delete('/delete/:id', async (req, res) => {

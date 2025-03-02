@@ -53,33 +53,41 @@ async function fetchBlogsByCategory(category, page = 1, append = false) {
   }
 }
 
-
+//display blogs
 function displayBlogs(blogsToDisplay, append = false) {
-  const blogHTML = blogsToDisplay
-    .map(blog => {
-      let mediaElement = "";
-      if (blog.video) {
-        mediaElement = `<video src="${blog.video}" controls></video>`; 
-      } else if (blog.image) {
-        mediaElement = `<img src="${blog.image}" alt="${blog.title}"/>`; 
-      }
+  const blogHTML = blogsToDisplay.map(blog => {
+    let mediaElement = "";
 
-      return `
-        <div class="blog-card" data-id="${blog._id}">
-          <div class="media">${mediaElement}</div>
-          <h2>${blog.title}</h2>
-          <div class="blog-content">${blog.content.substring(0, 100)}...</div>
-          <div class="actions">
-            <button onclick="likeBlog('${blog._id}')">❤️ <span class="like-count">${blog.likes || 0}</span></button>
-            <button onclick="window.location.href='blog.html?id=${blog._id}'">Read More</button>
-            <button onclick="window.location.href='comments.html?blogId=${blog._id}'">💬 Comments</button>
-            <button onclick="shareBlog('${blog._id}')">🔗 Share</button>
-          </div>
-          <span class="category">${blog.category}</span>
+    // ✅ If a YouTube link is present, embed it correctly
+    if (blog.video) {
+      const videoId = extractYouTubeVideoID(blog.video);
+      if (videoId) {
+        mediaElement = `<iframe width="100%" height="200" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
+      } else {
+        // If it's not a YouTube link, just show it as a clickable link
+        mediaElement = `<a href="${blog.video}" target="_blank">Watch Video</a>`;
+      }
+    }
+    // ✅ Display Image if available
+    else if (blog.image) {
+      mediaElement = `<img src="${blog.image}" alt="${blog.title}" />`;
+    }
+
+    return `
+      <div class="blog-card" data-id="${blog._id}">
+        <div class="media">${mediaElement}</div>
+        <h2>${blog.title}</h2>
+        <div class="blog-content">${blog.content.substring(0, 100)}...</div>
+        <div class="actions">
+          <button onclick="likeBlog('${blog._id}')">❤️ <span class="like-count">${blog.likes || 0}</span></button>
+          <button onclick="window.location.href='blog.html?id=${blog._id}'">Read More</button>
+          <button onclick="window.location.href='comments.html?blogId=${blog._id}'">💬 Comments</button>
+          <button onclick="shareBlog('${blog._id}')">🔗 Share</button>
         </div>
-      `;
-    })
-    .join('');
+        <span class="category">${blog.category}</span>
+      </div>
+    `;
+  }).join('');
 
   if (append) {
     blogsContainer.innerHTML += blogHTML;
@@ -88,7 +96,16 @@ function displayBlogs(blogsToDisplay, append = false) {
   }
 }
 
+// ✅ Extract YouTube Video ID Function
+function extractYouTubeVideoID(url) {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:.*v=|.*\/v\/|.*vi=|.*\/vi\/|.*\/embed\/|.*\/shorts\/|.*v%3D|.*vi%3D))([^?&/%]+)/);
+  return match ? match[1] : null;
+}
 
+
+
+
+//like a blog and only refresh the liked blog 
 async function likeBlog(id) {
   try {
     const response = await fetch(`/api/blog/like/${id}`, { method: 'POST' });
@@ -157,13 +174,13 @@ const shareBlog = async (id) => {
     }
 
     const data = await response.json();
-
     const blogUrl = data.blogUrl;
-    const previewText = data.previewText; 
+    const previewText = data.previewText;
+    const mediaPreview = data.mediaPreview; // ✅ Image or video preview
 
     const shareText = `📢 ${previewText} Read more: 👇 ${blogUrl}`;
 
-   
+    // ✅ Social Media Share Links (with media preview support)
     const shareLinks = {
       whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`,
       twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`,
@@ -171,18 +188,19 @@ const shareBlog = async (id) => {
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(blogUrl)}`,
     };
 
-   
+    // ✅ Share Popup UI (includes media preview)
     const sharePopup = `
-    <div class="share-popup">
-      <h3>📢 Share this Blog</h3>
-      <a href="${shareLinks.whatsapp}" target="_blank" class="fab fa-whatsapp" title="Share on WhatsApp"></a>
-      <a href="${shareLinks.twitter}" target="_blank" class="fab fa-twitter" title="Share on Twitter"></a>
-      <a href="${shareLinks.facebook}" target="_blank" class="fab fa-facebook" title="Share on Facebook"></a>
-      <a href="${shareLinks.linkedin}" target="_blank" class="fab fa-linkedin" title="Share on LinkedIn"></a>
-      <button onclick="closeSharePopup()">❌ Close</button>
-    </div>
-  `;
-  
+      <div class="share-popup">
+        <h3>📢 Share this Blog</h3>
+        ${mediaPreview ? `<img src="${mediaPreview}" class="share-preview-media" alt="Preview" />` : ''}
+        <p>${previewText}</p>
+        <a href="${shareLinks.whatsapp}" target="_blank" class="fab fa-whatsapp" title="Share on WhatsApp"></a>
+        <a href="${shareLinks.twitter}" target="_blank" class="fab fa-twitter" title="Share on Twitter"></a>
+        <a href="${shareLinks.facebook}" target="_blank" class="fab fa-facebook" title="Share on Facebook"></a>
+        <a href="${shareLinks.linkedin}" target="_blank" class="fab fa-linkedin" title="Share on LinkedIn"></a>
+        <button onclick="closeSharePopup()">❌ Close</button>
+      </div>
+    `;
 
     document.body.insertAdjacentHTML('beforeend', sharePopup);
   } catch (err) {
@@ -190,13 +208,50 @@ const shareBlog = async (id) => {
   }
 };
 
-
+// ✅ Close the share popup
 const closeSharePopup = () => {
   const popup = document.querySelector('.share-popup');
   if (popup) {
     popup.remove();
   }
 };
+
+
+// ✅ Function to Update Open Graph & Twitter Meta Tags
+function updateMetaTags(blog) {
+  document.getElementById("og-title").setAttribute("content", blog.title);
+  document.getElementById("og-description").setAttribute("content", blog.content.substring(0, 100));
+  document.getElementById("og-url").setAttribute("content", window.location.href);
+
+  // ✅ Show Blog Image if Available, Otherwise Show Video Thumbnail
+  if (blog.image) {
+    document.getElementById("og-image").setAttribute("content", blog.image);
+    document.getElementById("twitter-image").setAttribute("content", blog.image);
+  } else if (blog.video) {
+    document.getElementById("og-image").setAttribute("content", `https://img.youtube.com/vi/${extractVideoID(blog.video)}/hqdefault.jpg`);
+    document.getElementById("twitter-image").setAttribute("content", `https://img.youtube.com/vi/${extractVideoID(blog.video)}/hqdefault.jpg`);
+  }
+
+  document.getElementById("twitter-title").setAttribute("content", blog.title);
+  document.getElementById("twitter-description").setAttribute("content", blog.content.substring(0, 100));
+}
+
+// ✅ Function to Extract Video ID from a YouTube URL (if applicable)
+function extractVideoID(videoUrl) {
+  const match = videoUrl.match(/[?&]v=([^&]+)/);
+  return match ? match[1] : "";
+}
+
+// ✅ Automatically Update Meta Tags When a Blog is Opened
+document.addEventListener("DOMContentLoaded", () => {
+  const blogId = new URLSearchParams(window.location.search).get("id");
+  if (blogId) {
+    fetch(`/api/blog/${blogId}`)
+      .then((res) => res.json())
+      .then((blog) => updateMetaTags(blog))
+      .catch((err) => console.error("Error fetching blog details:", err));
+  }
+});
 
 
 

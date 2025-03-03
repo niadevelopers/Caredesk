@@ -58,13 +58,20 @@ function displayBlogs(blogsToDisplay, append = false) {
   const blogHTML = blogsToDisplay.map(blog => {
     let mediaElement = "";
 
-    // ✅ If a YouTube link is present, embed it correctly
+    // ✅ Check if a video link is present and determine its platform
     if (blog.video) {
-      const videoId = extractYouTubeVideoID(blog.video);
-      if (videoId) {
-        mediaElement = `<iframe width="100%" height="200" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
+      if (isYouTubeLink(blog.video)) {
+        const videoId = extractYouTubeVideoID(blog.video);
+        mediaElement = videoId
+          ? `<iframe width="100%" height="200" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`
+          : `<a href="${blog.video}" target="_blank">Watch Video</a>`;
+      } else if (isTikTokLink(blog.video)) {
+        mediaElement = `<blockquote class="tiktok-embed" cite="${blog.video}" data-video-id="${extractTikTokVideoID(blog.video)}" style="max-width: 100%;min-width: 325px;">
+          <a href="${blog.video}">Watch on TikTok</a></blockquote>
+          <script async src="https://www.tiktok.com/embed.js"></script>`;
+      } else if (isFacebookLink(blog.video)) {
+        mediaElement = `<iframe src="https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(blog.video)}&show_text=false" width="100%" height="300" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen></iframe>`;
       } else {
-        // If it's not a YouTube link, just show it as a clickable link
         mediaElement = `<a href="${blog.video}" target="_blank">Watch Video</a>`;
       }
     }
@@ -96,14 +103,30 @@ function displayBlogs(blogsToDisplay, append = false) {
   }
 }
 
-// ✅ Extract YouTube Video ID Function
+// ✅ Helper Functions to Identify Video Platforms
+function isYouTubeLink(url) {
+  return url.includes("youtube.com") || url.includes("youtu.be");
+}
+
+function isTikTokLink(url) {
+  return url.includes("tiktok.com");
+}
+
+function isFacebookLink(url) {
+  return url.includes("facebook.com") || url.includes("fb.watch");
+}
+
+// ✅ Extract YouTube Video ID
 function extractYouTubeVideoID(url) {
   const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:.*v=|.*\/v\/|.*vi=|.*\/vi\/|.*\/embed\/|.*\/shorts\/|.*v%3D|.*vi%3D))([^?&/%]+)/);
   return match ? match[1] : null;
 }
 
-
-
+// ✅ Extract TikTok Video ID
+function extractTikTokVideoID(url) {
+  const match = url.match(/video\/(\d+)/);
+  return match ? match[1] : null;
+}
 
 //like a blog and only refresh the liked blog 
 async function likeBlog(id) {
@@ -113,7 +136,6 @@ async function likeBlog(id) {
     if (response.ok) {
       const { likes, blogId } = await response.json();
 
-     
       const blogCard = blogsContainer.querySelector(`[data-id="${blogId}"]`);
       if (blogCard) {
         const likeCountSpan = blogCard.querySelector('.like-count');
@@ -149,20 +171,6 @@ searchBar.addEventListener('input', () => {
   );
   displayBlogs(filteredBlogs);
 });
-
-
-categoryLinks.addEventListener('click', (e) => {
-  e.preventDefault();
-  if (e.target.tagName === 'A') {
-    const category = e.target.dataset.category;
-    if (category === 'all') {
-      fetchFirstBlogs();
-    } else {
-      fetchBlogsByCategory(category, 1);
-    }
-  }
-});
-
 
 
 
@@ -217,6 +225,7 @@ const closeSharePopup = () => {
 };
 
 
+
 // ✅ Function to Update Open Graph & Twitter Meta Tags
 function updateMetaTags(blog) {
   document.getElementById("og-title").setAttribute("content", blog.title);
@@ -236,11 +245,6 @@ function updateMetaTags(blog) {
   document.getElementById("twitter-description").setAttribute("content", blog.content.substring(0, 100));
 }
 
-// ✅ Function to Extract Video ID from a YouTube URL (if applicable)
-function extractVideoID(videoUrl) {
-  const match = videoUrl.match(/[?&]v=([^&]+)/);
-  return match ? match[1] : "";
-}
 
 // ✅ Automatically Update Meta Tags When a Blog is Opened
 document.addEventListener("DOMContentLoaded", () => {
@@ -254,8 +258,18 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+categoryLinks.addEventListener('click', (e) => {
+  e.preventDefault();
+  if (e.target.tagName === 'A') {
+    const category = e.target.dataset.category;
+    if (category === 'all') {
+      fetchFirstBlogs();
+    } else {
+      fetchBlogsByCategory(category, 1);
+    }
+  }
+});
 
 fetchFirstBlogs();
 
 document.getElementById('loadMoreBtn')?.addEventListener('click', fetchMoreBlogs);
-

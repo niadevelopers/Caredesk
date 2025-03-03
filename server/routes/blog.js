@@ -49,6 +49,11 @@ router.post('/create', async (req, res) => {
 });
 
 
+
+
+
+
+
 // ✅ Fetch first 15 blogs (for initial page load)
 router.get('/first-blogs', async (req, res) => {
   try {
@@ -129,7 +134,7 @@ router.post('/like/:id', async (req, res) => {
   }
 });
 
-
+// ✅ Generate a shareable blog link
 // ✅ Generate a shareable blog link with correct frontend domain & media preview
 router.get('/share/:id', async (req, res) => {
   try {

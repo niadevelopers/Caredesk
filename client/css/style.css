@@ -109,20 +109,26 @@ nav a:hover {
 
 .blog-card .actions {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-top: 1rem;
+  border-radius: 8px; /* Smooth edges */
+  overflow: hidden; /* Ensures seamless look */
 }
 
 .blog-card .actions button {
+  flex: 1; /* Equal width for all buttons */
   background-color: #f0c14b;
   color: #333;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  cursor: pointer;
+  padding: 0.7rem;
   font-weight: bold;
+  cursor: pointer;
+  text-align: center;
   transition: background-color 0.3s ease;
+  border-right: 1px solid #e2b33f; /* Subtle separator */
+}
+
+.blog-card .actions button:last-child {
+  border-right: none; /* Removes border from the last button */
 }
 
 .blog-card .actions button:hover {

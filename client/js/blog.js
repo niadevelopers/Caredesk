@@ -19,11 +19,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let mediaElement = "";
     
-    // ✅ Embed YouTube Video
+    // ✅ Embed YouTube or Facebook Video
     if (blog.video) {
-      const videoId = extractYouTubeVideoID(blog.video);
-      if (videoId) {
-        mediaElement = `<iframe width="100%" height="400" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
+      if (isYouTubeLink(blog.video)) {
+        const videoId = extractYouTubeVideoID(blog.video);
+        mediaElement = videoId
+          ?  `<iframe width="100%" height="400" src="https://www.youtube.com/embed/${videoId}?playlist=${videoId}&autoplay=1&loop=1&rel=0&modestbranding=1&controls=1&showinfo=0" frameborder="0" allowfullscreen></iframe>`
+          : `<a href="${blog.video}" target="_blank">Watch Video</a>`;
+      } else if (isFacebookLink(blog.video)) {
+        mediaElement = `<iframe src="https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(blog.video)}&show_text=false" width="100%" height="400" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen></iframe>`;
       } else {
         mediaElement = `<a href="${blog.video}" target="_blank">Watch Video</a>`;
       }
@@ -37,7 +41,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       <h1>${blog.title}</h1>
       <div class="media">${mediaElement}</div>
       <p>${blog.content}</p>
-     
     `;
 
   } catch (error) {
@@ -45,6 +48,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     blogContainer.innerHTML = "<p>Error loading blog.</p>";
   }
 });
+
+// ✅ Helper Functions to Identify Video Platforms
+function isYouTubeLink(url) {
+  return url.includes("youtube.com") || url.includes("youtu.be");
+}
+
+function isFacebookLink(url) {
+  return url.includes("facebook.com") || url.includes("fb.watch");
+}
 
 // ✅ Extract YouTube Video ID
 function extractYouTubeVideoID(url) {

@@ -1,81 +1,58 @@
 const express = require('express');
-const multer = require('multer');
 const bcrypt = require('bcrypt');
 const Admin = require('../models/Admin');
 const Blog = require('../models/Blog');
 
 const router = express.Router();
 
-// Configure multer for uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'server/uploads'),
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname),
-});
+// ✅ Create a new blog post (Accepts YouTube video URLs & Image URLs)
+router.post('/create', async (req, res) => {
+  try {
+    const { title, content, category, image, video } = req.body;
 
-const upload = multer({
-  storage,
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB limit
-  fileFilter: (req, file, cb) => {
-    const acceptedTypes = ['image/jpeg', 'image/png', 'video/mp4'];
-    if (acceptedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type. Only JPEG, PNG images, and MP4 videos are allowed.'));
+    // ✅ Validate required fields
+    if (!title || !content || !category) {
+      return res.status(400).json({ error: 'Title, content, and category are required.' });
     }
-  },
-});
 
-// Route: Create a new blog post
-router.post(
-  '/create',
-  upload.fields([
-    { name: 'image', maxCount: 1 },
-    { name: 'video', maxCount: 1 },
-  ]),
-  async (req, res) => {
-    try {
-      const { title, content, category } = req.body;
-
-      // Validate required fields
-      if (!title || !content || !category) {
-        return res
-          .status(400)
-          .json({ error: 'Title, content, and category are required.' });
-      }
-
-      // Process uploaded files
-      const image = req.files['image'] ? `/uploads/${req.files['image'][0].filename}` : null;
-      const video = req.files['video'] ? `/uploads/${req.files['video'][0].filename}` : null;
-
-      if (!image && !video) {
-        return res
-          .status(400)
-          .json({ error: 'At least one media file (image or video) is required.' });
-      }
-
-      // Create and save the blog
-      const newBlog = new Blog({
-        title,
-        content,
-        category,
-        image,
-        video,
-        likes: 0, // Initialize likes to 0
-      });
-      await newBlog.save();
-
-      res.status(201).json({ message: 'Blog post created successfully.', blog: newBlog });
-    } catch (err) {
-      console.error('Error creating blog post:', err.message);
-      res.status(500).json({ error: 'Internal server error', details: err.message });
+    // ✅ Ensure at least an image or video URL is provided
+    if (!image && !video) {
+      return res.status(400).json({ error: 'Either an image URL or a YouTube video URL is required.' });
     }
+
+    // ✅ If a YouTube link is provided, ensure it's a valid YouTube URL
+    let videoUrl = null;
+    if (video) {
+      const youtubeRegex =
+        /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)$/;
+      if (!youtubeRegex.test(video)) {
+        return res.status(400).json({ error: 'Invalid YouTube URL.' });
+      }
+      videoUrl = video;
+    }
+
+    // ✅ Save the blog with media URLs (Image & YouTube Video)
+    const newBlog = new Blog({
+      title,
+      content,
+      category,
+      image: image || null, // Store image URL
+      video: videoUrl || null, // Store YouTube video URL
+      likes: 0,
+    });
+
+    await newBlog.save();
+    res.status(201).json({ message: 'Blog created successfully.', blog: newBlog });
+  } catch (err) {
+    console.error('Error creating blog post:', err.message);
+    res.status(500).json({ error: 'Internal server error' });
   }
-);
+});
 
-// Route: Fetch all blogs for the admin panel
+// ✅ Fetch all blogs for the admin panel
 router.get('/all', async (req, res) => {
   try {
-    const blogs = await Blog.find().select('title content category createdAt');
+    const blogs = await Blog.find().select('title content category image video createdAt');
     res.status(200).json(blogs);
   } catch (err) {
     console.error('Error fetching blogs for admin:', err.message);
@@ -83,20 +60,35 @@ router.get('/all', async (req, res) => {
   }
 });
 
-// Route: Edit a blog post
+// ✅ Edit a blog post
 router.put('/edit/:id', async (req, res) => {
   try {
-    const { title, content, category } = req.body;
+    const { title, content, category, image, video } = req.body;
 
     if (!title || !content || !category) {
-      return res
-        .status(400)
-        .json({ error: 'Title, content, and category are required.' });
+      return res.status(400).json({ error: 'Title, content, and category are required.' });
     }
 
+    // ✅ Ensure at least one media is provided
+    if (!image && !video) {
+      return res.status(400).json({ error: 'Either an image URL or a YouTube video URL is required.' });
+    }
+
+    // ✅ If updating video, validate YouTube URL
+    let videoUrl = null;
+    if (video) {
+      const youtubeRegex =
+        /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)$/;
+      if (!youtubeRegex.test(video)) {
+        return res.status(400).json({ error: 'Invalid YouTube URL.' });
+      }
+      videoUrl = video;
+    }
+
+    // ✅ Update blog post
     const updatedBlog = await Blog.findByIdAndUpdate(
       req.params.id,
-      { title, content, category },
+      { title, content, category, image, video: videoUrl },
       { new: true }
     );
 
@@ -111,7 +103,7 @@ router.put('/edit/:id', async (req, res) => {
   }
 });
 
-// Route: Delete a blog post
+// ✅ Delete a blog post
 router.delete('/delete/:id', async (req, res) => {
   try {
     const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
@@ -127,7 +119,7 @@ router.delete('/delete/:id', async (req, res) => {
   }
 });
 
-// Route: Admin registration
+// ✅ Admin registration
 router.post('/register', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -138,15 +130,12 @@ router.post('/register', async (req, res) => {
       return res.status(403).json({ error: 'Admin already registered.' });
     }
 
-    // Validate input
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
 
-    // Hash the password
+    // Hash password & save admin
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Save the admin
     const newAdmin = new Admin({ email, password: hashedPassword });
     await newAdmin.save();
 
@@ -157,18 +146,18 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Route: Admin login
+// ✅ Admin login
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find the admin
+    // Find admin
     const admin = await Admin.findOne({ email });
     if (!admin) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
-    // Compare the password
+    // Compare password
     const isPasswordValid = await bcrypt.compare(password, admin.password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Invalid email or password.' });

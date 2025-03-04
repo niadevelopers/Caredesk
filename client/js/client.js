@@ -53,9 +53,10 @@ async function fetchBlogsByCategory(category, page = 1, append = false) {
   }
 }
 
-//display blogs
+
+// Display blogs with ads inserted every 2 posts
 function displayBlogs(blogsToDisplay, append = false) {
-  const blogHTML = blogsToDisplay.map(blog => {
+  const blogHTML = blogsToDisplay.map((blog, index) => {
     let mediaElement = "";
 
     // ✅ Check if a video link is present and determine its platform
@@ -80,7 +81,8 @@ function displayBlogs(blogsToDisplay, append = false) {
       mediaElement = `<img src="${blog.image}" alt="${blog.title}" />`;
     }
 
-    return `
+    // ✅ Generate the blog card
+    let blogCard = `
       <div class="blog-card" data-id="${blog._id}">
         <div class="media">${mediaElement}</div>
         <h2>${blog.title}</h2>
@@ -94,6 +96,25 @@ function displayBlogs(blogsToDisplay, append = false) {
         <span class="category">${blog.category}</span>
       </div>
     `;
+
+    // ✅ Inject AdSense ad every 2 blog posts
+    if ((index + 1) % 2 === 0) {
+      blogCard += `
+        <div class="ad-container">
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="ca-pub-1316754501583523"
+               data-ad-slot="4147883169"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+          <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+          </script>
+        </div>
+      `;
+    }
+
+    return blogCard;
   }).join('');
 
   if (append) {
@@ -102,6 +123,7 @@ function displayBlogs(blogsToDisplay, append = false) {
     blogsContainer.innerHTML = blogHTML;
   }
 }
+
 
 // ✅ Helper Functions to Identify Video Platforms
 function isYouTubeLink(url) {

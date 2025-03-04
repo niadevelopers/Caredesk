@@ -30,6 +30,42 @@
   
 </head>
 
+  <style>
+    @media screen and (max-width: 768px) {
+  .blog-card {
+    width: 65%;
+    margin-left: 0;
+    position: relative; /* Required for absolute positioning of the button */
+  }
+
+  .blog-card .actions {
+    display: flex;
+    flex-wrap: wrap; /* Allows buttons to wrap properly */
+  }
+
+  .blog-card .actions button {
+    flex: 1 1 48%; /* Ensures two buttons per row */
+  }
+
+  .blog-card .share-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #007bff;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .blog-card .share-btn:hover {
+    background-color: #0056b3;
+  }
+}
+
+  </style>
+
 <body>
 
    <div id="dark-mode-toggle" class="floating-toggle" title="Toggle Dark Mode">

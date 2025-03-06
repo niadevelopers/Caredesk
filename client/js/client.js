@@ -1,3 +1,4 @@
+
 const blogsContainer = document.getElementById('blogs');
 const searchBar = document.getElementById('search-bar');
 const categoryLinks = document.getElementById('categories');
@@ -53,15 +54,12 @@ async function fetchBlogsByCategory(category, page = 1, append = false) {
   }
 }
 
-
-// Display blogs with ads inserted every 3 posts
+//display blogs
 function displayBlogs(blogsToDisplay, append = false) {
-  let blogHTML = "";
-  
-  blogsToDisplay.forEach((blog, index) => {
+  const blogHTML = blogsToDisplay.map(blog => {
     let mediaElement = "";
 
-    // ✅ Media Handling (YouTube, TikTok, Facebook, Image)
+    // ✅ Check if a video link is present and determine its platform
     if (blog.video) {
       if (isYouTubeLink(blog.video)) {
         const videoId = extractYouTubeVideoID(blog.video);
@@ -77,12 +75,13 @@ function displayBlogs(blogsToDisplay, append = false) {
       } else {
         mediaElement = `<a href="${blog.video}" target="_blank">Watch Video</a>`;
       }
-    } else if (blog.image) {
+    }
+    // ✅ Display Image if available
+    else if (blog.image) {
       mediaElement = `<img src="${blog.image}" alt="${blog.title}" />`;
     }
 
-    // ✅ Normal Blog Card (65%)
-    blogHTML += `
+    return `
       <div class="blog-card" data-id="${blog._id}">
         <div class="media">${mediaElement}</div>
         <h2>${blog.title}</h2>
@@ -96,53 +95,14 @@ function displayBlogs(blogsToDisplay, append = false) {
         <span class="category">${blog.category}</span>
       </div>
     `;
-
-    // ✅ Insert Ad Blog every 3 blogs
-    if ((index + 1) % 3 === 0) {
-      blogHTML += `
-        <div class="blog-card ad-blog" onclick="triggerAdClick()">
-          <div class="media">
-            <!-- Google AdSense Ad Space -->
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-1316754501583523"
-                 data-ad-slot="4147883169"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-          </div>
-          <h2>Sponsored</h2>
-          <div class="blog-content">Ads that match your interests will appear here.</div>
-          <div class="actions">
-            <button class="dummy-btn">❤️ <span class="like-count">999+</span></button>
-            <button class="dummy-btn">Read More</button>
-            <button class="dummy-btn">💬 Comments</button>
-            <button class="dummy-btn">🔗 Share</button>
-          </div>
-        </div>
-      `;
-    }
-  });
+  }).join('');
 
   if (append) {
     blogsContainer.innerHTML += blogHTML;
   } else {
     blogsContainer.innerHTML = blogHTML;
   }
-
-  // ✅ Activate AdSense Ads
-  (adsbygoogle = window.adsbygoogle || []).push({});
 }
-
-// ✅ Function to Trigger Ad Click
-function triggerAdClick() {
-  const adElement = document.querySelector(".ad-blog ins");
-  if (adElement) {
-    adElement.click(); // Simulates clicking the AdSense ad
-  }
-}
-
-
-
 
 // ✅ Helper Functions to Identify Video Platforms
 function isYouTubeLink(url) {

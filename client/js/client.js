@@ -97,6 +97,12 @@ function displayBlogs(blogsToDisplay, append = false) {
     `;
   }).join('');
 
+  if (append) {
+    blogsContainer.innerHTML += blogHTML;
+  } else {
+    blogsContainer.innerHTML = blogHTML;
+  }
+}
  
 
 // ✅ Helper Functions to Identify Video Platforms

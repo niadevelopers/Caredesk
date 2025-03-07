@@ -56,6 +56,10 @@ async function fetchBlogsByCategory(category, page = 1, append = false) {
 
 //display blogs
 function displayBlogs(blogsToDisplay, append = false) {
+  const blogsContainer = document.querySelector(".blogs-container");
+
+  if (!blogsContainer) return console.error("Error: Blogs container not found!");
+
   const blogHTML = blogsToDisplay.map(blog => {
     let mediaElement = "";
 
@@ -78,7 +82,7 @@ function displayBlogs(blogsToDisplay, append = false) {
     }
     // ✅ Display Image if available
     else if (blog.image) {
-      mediaElement = `<img src="${blog.image}" alt="${blog.title}" />`;
+      mediaElement = `<img src="${blog.image}" alt="${blog.title}" loading="lazy" />`;
     }
 
     return `
@@ -98,11 +102,12 @@ function displayBlogs(blogsToDisplay, append = false) {
   }).join('');
 
   if (append) {
-    blogsContainer.innerHTML += blogHTML;
+    blogsContainer.insertAdjacentHTML('beforeend', blogHTML);
   } else {
     blogsContainer.innerHTML = blogHTML;
   }
 }
+
  
 
 // ✅ Helper Functions to Identify Video Platforms

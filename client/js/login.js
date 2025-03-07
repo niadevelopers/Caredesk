@@ -16,7 +16,7 @@ loginForm.addEventListener('submit', async (e) => {
     const result = await response.json();
     if (response.ok) {
       alert(result.message);
-      window.location.href = 'admin.html';
+      window.location.href = 'encrypted_admin_ui-v2_4d12f3b90008-ab00-43a0-bd23-2345b678a905-data-visualization-and-user-role-mgmt--2023.html';
     } else {
       alert(result.error);
     }

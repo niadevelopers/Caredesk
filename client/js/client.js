@@ -97,12 +97,7 @@ function displayBlogs(blogsToDisplay, append = false) {
     `;
   }).join('');
 
- if (append) {
-  blogsContainer.insertAdjacentHTML('beforeend', blogHTML);  // ✅ Prevents nesting issues
-} else {
-  blogsContainer.innerHTML = blogHTML;  
-}
-  }
+ 
 
 // ✅ Helper Functions to Identify Video Platforms
 function isYouTubeLink(url) {

@@ -65,24 +65,9 @@ nav a:hover {
 
 .blogs-container {
   display: grid;
-  grid-template-columns: repeat(3, minmax(280px, 1fr)); /* 3 columns default */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
   margin-top: 2rem;
-  align-items: start; /* Prevent uneven heights from breaking layout */
-}
-
-/* Medium screens (Tablets & Small Laptops) */
-@media (max-width: 1024px) {
-  .blogs-container {
-    grid-template-columns: repeat(2, minmax(280px, 1fr)); /* 2 columns */
-  }
-}
-
-/* Small screens (Phones) */
-@media (max-width: 600px) {
-  .blogs-container {
-    grid-template-columns: repeat(1, minmax(280px, 1fr)); /* 1 column */
-  }
 }
 
 .blog-card {
@@ -91,10 +76,6 @@ nav a:hover {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
 }
 
 .blog-card:hover {
@@ -103,39 +84,38 @@ nav a:hover {
 }
 
 .blog-card .media {
-  width: 100%;
+  margin-bottom: 1.5rem;
   border-radius: 8px;
   overflow: hidden;
 }
 
 .blog-card img,
-.blog-card iframe {
+.blog-card video {
   width: 100%;
   height: auto;
   border-radius: 8px;
-  object-fit: cover; /* Prevents distortion */
 }
 
 .blog-card h2 {
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   margin-bottom: 1rem;
   color: #333;
 }
 
-.blog-card .blog-content {
+.blog-card p {
   font-size: 1rem;
   color: #555;
-  flex-grow: 1;
 }
 
 .blog-card .actions {
   display: flex;
-  justify-content: space-between;
   margin-top: 1rem;
+  border-radius: 8px; /* Smooth edges */
+  overflow: hidden; /* Ensures seamless look */
 }
 
 .blog-card .actions button {
-  flex: 1;
+  flex: 1; /* Equal width for all buttons */
   background-color: #f0c14b;
   color: #333;
   border: none;
@@ -144,20 +124,17 @@ nav a:hover {
   cursor: pointer;
   text-align: center;
   transition: background-color 0.3s ease;
+  border-right: 1px solid #e2b33f; /* Subtle separator */
 }
 
-.blog-card .actions button:not(:last-child) {
-  margin-right: 0.5rem;
+.blog-card .actions button:last-child {
+  border-right: none; /* Removes border from the last button */
 }
 
-.blog-card .category {
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: #666;
-  margin-top: 1rem;
-  display: block;
-  text-align: center;
+.blog-card .actions button:hover {
+  background-color: #c78e22;
 }
+
 
 
 .social-icon:hover {

@@ -98,7 +98,7 @@ function displayBlogs(blogsToDisplay, append = false) {
   }).join('');
 
   if (append) {
-    blogsContainer.innerHTML = blogHTML;
+    blogsContainer.innerHTML -= blogHTML;
   } else {
     blogsContainer.innerHTML = blogHTML;
   }

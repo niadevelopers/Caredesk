@@ -225,19 +225,22 @@ body.dark-mode #dark-mode-toggle {
   color: #fff;
 }
 
-/* Collapsible categories sidebar */
+/* Base Styles for the Sidebar */
 #categories {
   position: fixed;
   top: 0;
   left: 0;
-  background-color:rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.8); /* Slightly transparent background */
   color: #fff;
-  width: 250px;
+  width: 300px; /* Slightly wider for a more executive look */
   height: 100%;
   transform: translateX(-100%); /* Initially hidden */
-  transition: transform 0.3s ease; /* Smooth transition */
+  transition: transform 0.5s ease, background-color 0.5s ease; /* Smooth transitions */
   padding-top: 20px;
   z-index: 1000;
+  backdrop-filter: blur(10px); /* Glassmorphism effect */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); /* Soft shadow for depth */
+  border-right: 2px solid rgba(255, 255, 255, 0.2); /* Faint border to the right */
 }
 
 /* When toggled, slide the categories section in */
@@ -245,18 +248,114 @@ body.dark-mode #dark-mode-toggle {
   transform: translateX(0);
 }
 
-/* Style for the category links */
-#categories a {
-  display: block;
-  padding: 10px;
-  color: #fff;
-  text-decoration: none;
-  font-size: 16px;
-  transition: background-color 0.3s;
+/* Container for the links, with spacing adjustments */
+#category-links {
+  margin-top: 100px;
 }
 
+/* Category links styles */
+#categories a {
+  display: block;
+  padding: 15px 20px; /* Increased padding for a spacious feel */
+  color: #fff;
+  text-decoration: none;
+  font-size: 18px;
+  transition: background-color 0.3s ease, padding-left 0.3s ease; /* Smooth hover transitions */
+  border-radius: 8px; /* Rounded corners */
+  margin-bottom: 10px; /* Space between links */
+}
+
+/* Bold and sleek first link (Dashboard) */
+#category-links a:first-child {
+  font-weight: bold;
+  font-size: 20px;
+  background-color: #2c3e50; /* A distinct color for the Dashboard link */
+  padding-left: 30px; /* More padding on the left for visual prominence */
+}
+
+/* Hover effect for links (executive-style) */
 #categories a:hover {
   background-color: #34495e;
+  padding-left: 40px; /* Subtle shift to the right on hover for depth */
+  cursor: pointer;
+}
+
+/* Horizontal rule (hr) styles */
+hr {
+  border: 0;
+  border-top: 2px solid #ecf0f1;
+  margin: 15px 0;
+  opacity: 0.2;
+}
+
+/* Overall Sidebar Transitions */
+#categories.show {
+  background-color: rgba(0, 0, 0, 0.9); /* Darker on open */
+}
+
+/* Add subtle animations for the links */
+#categories a {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Fade-in effect for each link */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Glassmorphism - Semi-transparent blurred background effect for the sidebar */
+#categories {
+  backdrop-filter: blur(10px);
+  background-color: rgba(0, 0, 0, 0.6); /* Subtle glass effect */
+}
+
+/* Overlay effect when the sidebar is shown */
+#categories.show::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6); /* Dark overlay */
+  z-index: -1; /* Behind the sidebar */
+  backdrop-filter: blur(8px); /* Glass effect behind sidebar */
+}
+
+/* Additional hover effect for a luxurious feel */
+#categories a:hover {
+  background-color: #16a085; /* Change hover color to a more luxurious tone */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Add a soft shadow on hover */
+  transform: translateX(5px); /* Slight move on hover */
+}
+
+/* More polished overall look */
+#category-links {
+  margin-top: 100px; /* Space for the first link */
+  padding-right: 20px; /* Added right padding for better balance */
+  overflow-y: auto; /* Ensure content scrolls if too long */
+  height: calc(100% - 100px); /* Adjust to fit the sidebar's height */
+}
+/* For smaller screens */
+@media screen and (max-width: 768px) {
+  #categories {
+    width: 200px;
+  }
+}
+
+
+/* Style for the horizontal lines (hr) */
+hr {
+  border: 0;
+  border-top: 2px solid #ecf0f1;
+  margin: 10px 0;
 }
 
 /* Toggle button styling */
@@ -268,17 +367,6 @@ body.dark-mode #dark-mode-toggle {
   z-index: 1100;
   font-size: 24px;
 }
-
-/* For smaller screens */
-@media screen and (max-width: 768px) {
-  #categories {
-    width: 200px;
-  }
-}
-
-
-
-
 
 
 .share-popup {

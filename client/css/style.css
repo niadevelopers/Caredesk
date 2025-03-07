@@ -65,9 +65,23 @@ nav a:hover {
 
 .blogs-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr); /* Default: 3 columns */
   gap: 2rem;
   margin-top: 2rem;
+}
+
+/* Medium screens (Tablets & Small Laptops) */
+@media (max-width: 1024px) {
+  .blogs-container {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  }
+}
+
+/* Small screens (Phones) */
+@media (max-width: 600px) {
+  .blogs-container {
+    grid-template-columns: repeat(1, 1fr); /* 1 column */
+  }
 }
 
 .blog-card {
@@ -125,14 +139,6 @@ nav a:hover {
   text-align: center;
   transition: background-color 0.3s ease;
   border-right: 1px solid #e2b33f; /* Subtle separator */
-}
-
-.blog-card .actions button:last-child {
-  border-right: none; /* Removes border from the last button */
-}
-
-.blog-card .actions button:hover {
-  background-color: #c78e22;
 }
 
 

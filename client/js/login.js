@@ -16,7 +16,7 @@ loginForm.addEventListener('submit', async (e) => {
     const result = await response.json();
     if (response.ok) {
       alert(result.message);
-      window.location.href = 'admin.html';
+      window.location.href = 'admin&id=67caf4bf-a60c-8008-9e8f-4b5bf502b3265450158,3523googledisplayjs?client=crossorigin.html';
     } else {
       alert(result.error);
     }

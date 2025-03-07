@@ -31,15 +31,66 @@
 <meta name="twitter:image" content="{{ blogImageUrl }}" />
 <meta name="twitter:card" content="summary_large_image" />
 
+<style>
+ 
+ .tooltip {
+  position: absolute;
+  background-color: #ffc107; /* Eye-catching Yellow */
+  color: #333; /* Dark text for contrast */
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 6px;
+  white-space: nowrap;
+  top: 10px; /* Moves it slightly above */
+  left: 120%; /* Slightly further to the right */
+  transform: translateY(-100%); /* Ensures it's aligned obliquely */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out, transform 0.2s ease-in-out;
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Adjust Tooltip Arrow to Point Diagonally to the Button */
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%; /* Moves arrow to the bottom */
+  left: -10%; /* Adjusts it slightly to the right */
+  transform: translateX(-50%);
+  border-width: 8px;
+  border-style: solid;
+  border-color: #ffc107 transparent transparent transparent; /* Creates a triangle pointing downward */
+}
+
+/* Show Tooltip on Hover or when Activated */
+.floating-toggle:hover .tooltip,
+.floating-toggle.show-tooltip .tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-100%) translateX(5px); /* Slight movement for smooth effect */
+}
+
+/* Ensuring Tooltip is Relative to the Button */
+.floating-toggle {
+  position: relative;
+}
+
+
+</style>
 
   
 </head>
 
 <body>
 
-   <div id="dark-mode-toggle" class="floating-toggle" title="Toggle Dark Mode">
+  <div id="dark-mode-toggle" class="floating-toggle" title="Toggle Dark Mode">
     <span id="toggle-icon">🔽</span>
+    <span id="tooltip" class="tooltip">Show Dashboard</span>
   </div>
+  
    
 
   <header>
@@ -67,38 +118,38 @@
 
   <main>
 
-    <div id="categories">
-     <p></p>
-     <p></p>
-
-      <hr style="size:8px;color: white;">
+  <div id="categories">
+      
+    <div id="category-links">
+      <hr>
       
       <a href="#" data-category="Breaking News">Breaking News</a>
       <a href="#" data-category="Politics & Governance">Politics & Governance</a>
 
-      <hr style="size:8px;color: white;">
+      <hr>
 
       <a href="#" data-category="Crime & Justice">Crime & Justice</a>
       <a href="#" data-category="Football & Sports">Football & Sports</a>
       
-      <hr style="size:8px;color: white;">
+      <hr>
       
       <a href="#" data-category="MMA & Combat Sports">MMA & Combat Sports</a>
       <a href="#" data-category="Business & Finance">Business & Finance</a>
 
-      <hr style="size:8px;color: white;">
+      <hr>
       
       <a href="#" data-category="Technology & Innovation">Technology & Innovation</a>
       <a href="#" data-category="Health & Wellness">Health & Wellness</a>
 
-      <hr style="size:8px;color: white;">
+      <hr>
       
       <a href="#" data-category="Comedy & Entertainment">Comedy & Entertainment</a>
       <a href="#" data-category="Fun Facts & Curiosities ">Fun Facts & Curiosities </a>
 
-      <hr style="size:8px;color: white;">
+      <hr>
  
-    </div>
+   </div>
+  </div>
 
  <section>
     <div class="container">
@@ -178,8 +229,54 @@
     </div>
 </footer>
 
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+    const darkModeToggle = document.getElementById("dark-mode-toggle");
+    const tooltip = document.createElement("span");
+    const dashboard = document.getElementById("categories"); // Ensure this ID exists in your HTML
+
+    // Create and style the tooltip
+    tooltip.className = "tooltip";
+    darkModeToggle.appendChild(tooltip);
+
+    // Function to update tooltip text based on dashboard visibility
+    function updateTooltip() {
+        if (dashboard.style.display === "none") {
+            tooltip.textContent = "Show Dashboard";
+        } else {
+            tooltip.textContent = "Hide Dashboard";
+        }
+    }
+
+    // Initial state (dashboard is visible by default)
+    dashboard.style.display = "block";
+    updateTooltip();
+
+    // Show tooltip after 1.5 seconds
+    setTimeout(() => {
+        darkModeToggle.classList.add("show-tooltip");
+
+        // Hide tooltip after 3 seconds
+        setTimeout(() => {
+            darkModeToggle.classList.remove("show-tooltip");
+        }, 3000);
+    }, 1500);
+
+    // Toggle dashboard visibility and update tooltip on click
+    darkModeToggle.addEventListener("click", function () {
+        if (dashboard.style.display === "none") {
+            dashboard.style.display = "block";
+        } else {
+            dashboard.style.display = "none";
+        }
+        updateTooltip(); // Update the tooltip text dynamically
+    });
+});
 
 
+
+</script>
 
 
   <script src="js/categories.js"></script>

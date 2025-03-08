@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel Caredesk</title>
+  <link rel="stylesheet" href="css/admin.css">
+  
+  <!-- ✅ Load CKEditor for Rich Text Editing -->
+  <script src="https://cdn.ckeditor.com/4.19.0/standard/ckeditor.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      max-width: 600px;
+      margin: auto;
+    }
+    input, select, button, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    #admin-blogs {
+      margin-top: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      max-width: 800px;
+      margin: auto;
+    }
+    .floating-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: black;
+      color: white;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 🔹 Dark Mode Toggle -->
+  <div id="dark-mode-toggle" class="floating-toggle" title="Toggle Dark Mode">
+    <span id="toggle-icon">🌞</span>
+  </div>
+  
+  <h1>Welcome, <span id="admin-role"></span> Admin</h1>
+
+  <form id="blogForm">
+    <h2>New Article</h2>
+  
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" placeholder="Enter Blog Title" required>
+  
+    <label for="content">Content:</label>
+    <textarea id="content" name="content" placeholder="Write your blog here..." required></textarea>
+  
+    <label for="category">Category:</label>
+    <select id="category" name="category" required>
+      <option value="">Select a Category</option>
+      <option value="Trending">Trending</option>
+      <option value="Breaking News">Breaking News</option>
+      <option value="Science Fiction">Science Fiction</option>
+      <option value="Games">Games</option>
+      <option value="Crime">Crime</option>
+      <option value="Nyaluchu">Nyaluchu</option>
+    </select>
+  
+    <label for="imageUrl">Image URL:</label>
+    <input type="url" id="imageUrl" name="imageUrl" placeholder="Paste image URL">
+
+    <label for="videoUrl">YouTube Video URL:</label>
+    <input type="url" id="videoUrl" name="videoUrl" placeholder="Paste YouTube video link">
+  
+    <button type="submit">Add Blog</button>
+  </form>
+
+  
+
+  <script src="js/admin.js"></script>
+  <script src="js/darkMode.js"></script>
+  <script src="js/admine.js"></script>
+  <script src="js/checkRole.js"></script> <!-- 🔹 New role-based script -->
+</body>
+</html>

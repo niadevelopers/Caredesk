@@ -14,9 +14,23 @@ loginForm.addEventListener('submit', async (e) => {
     });
 
     const result = await response.json();
+
     if (response.ok) {
       alert(result.message);
-      window.location.href = 'encrypted_admin_ui-v2_4d12f3b90008-ab00-43a0-bd23-2345b678a905-data-visualization-and-user-role-mgmt--2023.html';
+
+      // Store the token and role in localStorage
+      localStorage.setItem('token', result.token);
+
+      // Decode token to get role
+      const tokenPayload = JSON.parse(atob(result.token.split('.')[1])); // Decode JWT payload
+      localStorage.setItem('role', tokenPayload.role);
+
+      // Redirect based on role
+      if (tokenPayload.role === 'chief') {
+        window.location.href = ''; // Chief Admin Full Dashboard
+      } else {
+        window.location.href = 'junior-dashboard.html'; // Junior Admin Limited Dashboard
+      }
     } else {
       alert(result.error);
     }

@@ -27,7 +27,7 @@ loginForm.addEventListener('submit', async (e) => {
 
       // Redirect based on role
       if (tokenPayload.role === 'chief') {
-        window.location.href = ''; // Chief Admin Full Dashboard
+        window.location.href = 'encrypted_admin_ui-v2_4d12f3b90008-ab00-43a0-bd23-2345b678a905-data-visualization-and-user-role-mgmt--2023.html'; // Chief Admin Full Dashboard
       } else {
         window.location.href = 'junior-dashboard.html'; // Junior Admin Limited Dashboard
       }

@@ -1,11 +1,13 @@
 document.addEventListener("DOMContentLoaded", function () {
   function createOverlay(videoElement) {
+    // Create overlay
     const overlay = document.createElement("div");
     overlay.classList.add("video-overlay");
-    overlay.innerHTML = `
-      <p>Video paused. Click to continue watching.</p>
-    `;
+    overlay.innerHTML = `<p>Video paused. Click to continue watching.</p>`;
     overlay.style.display = "none";
+
+    // Position overlay inside the video container
+    videoElement.parentElement.style.position = "relative";
     videoElement.parentElement.appendChild(overlay);
 
     // Clicking overlay resumes video
@@ -25,16 +27,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const overlay = createOverlay(video);
 
     video.addEventListener("pause", () => {
-      overlay.style.display = "flex"; // Show overlay
+      overlay.style.display = "flex"; // Show overlay when paused
     });
 
     video.addEventListener("play", () => {
-      overlay.style.display = "none"; // Hide overlay
+      overlay.style.display = "none"; // Hide overlay when playing
     });
 
     video.addEventListener("timeupdate", () => {
       if (video.duration - video.currentTime <= 3) {
-        overlay.style.display = "flex"; // Show overlay when video is about to end
+        overlay.style.display = "flex"; // Show overlay near end
       }
     });
   }
@@ -42,13 +44,10 @@ document.addEventListener("DOMContentLoaded", function () {
   function handleIframe(iframe) {
     const overlay = createOverlay(iframe);
 
+    // YouTube & Facebook Video API Check
     const checkPause = setInterval(() => {
       getIframeStatus(iframe, (paused) => {
-        if (paused) {
-          overlay.style.display = "flex"; // Show overlay
-        } else {
-          overlay.style.display = "none"; // Hide overlay
-        }
+        overlay.style.display = paused ? "flex" : "none";
       });
     }, 1000);
 
@@ -57,28 +56,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function getIframeStatus(iframe, callback) {
     if (iframe.src.includes("youtube.com")) {
-      iframe.contentWindow.postMessage(
-        '{"event":"listening","id":1,"channel":"yt"}',
-        "*"
-      );
-      window.addEventListener("message", (event) => {
-        if (event.data && typeof event.data === "object" && event.data.info) {
-          callback(event.data.info.playerState === 2); // 2 = Paused
-        }
-      });
+      try {
+        iframe.contentWindow.postMessage(
+          '{"event":"listening","id":1,"channel":"yt"}',
+          "*"
+        );
+        window.addEventListener("message", (event) => {
+          if (event.data && typeof event.data === "object" && event.data.info) {
+            callback(event.data.info.playerState === 2); // 2 = Paused
+          }
+        });
+      } catch (e) {
+        console.error("YouTube iframe status error:", e);
+      }
     }
   }
 
   function resumeIframeVideo(iframe) {
     if (iframe.src.includes("youtube.com")) {
-      iframe.contentWindow.postMessage(
-        '{"event":"command","func":"playVideo","args":""}',
-        "*"
-      );
+      try {
+        iframe.contentWindow.postMessage(
+          '{"event":"command","func":"playVideo","args":""}',
+          "*"
+        );
+      } catch (e) {
+        console.error("YouTube resume error:", e);
+      }
     }
   }
 
-  // Apply logic to all videos and iframes
+  // Apply overlay to all videos & iframes
   document.querySelectorAll("video").forEach(handleVideo);
   document.querySelectorAll("iframe").forEach(handleIframe);
 });

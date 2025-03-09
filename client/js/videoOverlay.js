@@ -48,10 +48,20 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Initial application of overlay to videos in existing blogs
-  applyOverlayToVideos();
+  function waitForBlogsContainer() {
+    const blogsContainer = document.getElementById("blogsContainer");
+    if (!blogsContainer) {
+      setTimeout(waitForBlogsContainer, 100); // Wait until it exists
+      return;
+    }
 
-  // Ensure overlays are applied after new blogs are added dynamically
-  const observer = new MutationObserver(() => applyOverlayToVideos());
-  observer.observe(document.getElementById("blogsContainer"), { childList: true, subtree: true });
+    // Apply overlay to existing videos
+    applyOverlayToVideos();
+
+    // Observe dynamically added blog posts
+    const observer = new MutationObserver(() => applyOverlayToVideos());
+    observer.observe(blogsContainer, { childList: true, subtree: true });
+  }
+
+  waitForBlogsContainer(); // Start checking for blogsContainer
 });

@@ -1,22 +1,20 @@
 document.addEventListener("DOMContentLoaded", function () {
   function createOverlay(videoElement) {
-    // Create overlay
+    // Ensure the parent container is positioned correctly
+    videoElement.parentElement.style.position = "relative";
+
+    // Create the overlay
     const overlay = document.createElement("div");
     overlay.classList.add("video-overlay");
-    overlay.innerHTML = `<p>Video paused. Click to continue watching.</p>`;
-    overlay.style.display = "none";
+    overlay.innerHTML = `<p>Video paused. Click to resume.</p>`;
+    overlay.style.display = "none"; // Initially hidden
 
-    // Position overlay inside the video container
-    videoElement.parentElement.style.position = "relative";
+    // Append overlay to video container
     videoElement.parentElement.appendChild(overlay);
 
     // Clicking overlay resumes video
     overlay.addEventListener("click", () => {
-      if (videoElement.tagName === "VIDEO") {
-        videoElement.play();
-      } else if (videoElement.tagName === "IFRAME") {
-        resumeIframeVideo(videoElement);
-      }
+      videoElement.play();
       overlay.style.display = "none";
     });
 
@@ -36,56 +34,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
     video.addEventListener("timeupdate", () => {
       if (video.duration - video.currentTime <= 3) {
-        overlay.style.display = "flex"; // Show overlay near end
+        overlay.style.display = "flex"; // Show overlay 3 seconds before the end
       }
     });
   }
 
-  function handleIframe(iframe) {
-    const overlay = createOverlay(iframe);
-
-    // YouTube & Facebook Video API Check
-    const checkPause = setInterval(() => {
-      getIframeStatus(iframe, (paused) => {
-        overlay.style.display = paused ? "flex" : "none";
-      });
-    }, 1000);
-
-    iframe.dataset.overlayInterval = checkPause;
-  }
-
-  function getIframeStatus(iframe, callback) {
-    if (iframe.src.includes("youtube.com")) {
-      try {
-        iframe.contentWindow.postMessage(
-          '{"event":"listening","id":1,"channel":"yt"}',
-          "*"
-        );
-        window.addEventListener("message", (event) => {
-          if (event.data && typeof event.data === "object" && event.data.info) {
-            callback(event.data.info.playerState === 2); // 2 = Paused
-          }
-        });
-      } catch (e) {
-        console.error("YouTube iframe status error:", e);
+  function applyOverlayToVideos() {
+    document.querySelectorAll(".blog-card video").forEach(video => {
+      if (!video.dataset.overlayAdded) {
+        handleVideo(video);
+        video.dataset.overlayAdded = "true"; // Prevent duplicate overlays
       }
-    }
+    });
   }
 
-  function resumeIframeVideo(iframe) {
-    if (iframe.src.includes("youtube.com")) {
-      try {
-        iframe.contentWindow.postMessage(
-          '{"event":"command","func":"playVideo","args":""}',
-          "*"
-        );
-      } catch (e) {
-        console.error("YouTube resume error:", e);
-      }
-    }
-  }
+  // Initial application of overlay to videos in existing blogs
+  applyOverlayToVideos();
 
-  // Apply overlay to all videos & iframes
-  document.querySelectorAll("video").forEach(handleVideo);
-  document.querySelectorAll("iframe").forEach(handleIframe);
+  // Ensure overlays are applied after new blogs are added dynamically
+  const observer = new MutationObserver(() => applyOverlayToVideos());
+  observer.observe(document.getElementById("blogsContainer"), { childList: true, subtree: true });
 });

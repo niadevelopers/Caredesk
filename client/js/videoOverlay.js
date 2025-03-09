@@ -1,83 +1,83 @@
 document.addEventListener("DOMContentLoaded", function () {
-  function createOverlay(videoElement) {
-    // Ensure the parent container is positioned correctly
-    const parent = videoElement.parentElement;
-    parent.style.position = "relative";
+  function createOverlay(iframe) {
+    const parent = iframe.parentElement;
+    parent.style.position = "relative"; // Ensure correct positioning
 
-    // Create the overlay
     const overlay = document.createElement("div");
     overlay.classList.add("video-overlay");
     overlay.innerHTML = `<p>Video paused. Click to resume.</p>`;
-    
-    // Apply styles directly in JavaScript
-    overlay.style.position = "absolute";
-    overlay.style.top = "0";
-    overlay.style.left = "0";
-    overlay.style.width = "100%";
-    overlay.style.height = "100%";
-    overlay.style.display = "none"; // Initially hidden
-    overlay.style.background = "rgba(0, 0, 0, 0.7)";
-    overlay.style.color = "#fff";
-    overlay.style.fontSize = "18px";
-    overlay.style.display = "flex";
-    overlay.style.justifyContent = "center";
-    overlay.style.alignItems = "center";
-    overlay.style.cursor = "pointer";
-    overlay.style.zIndex = "10"; // Ensure it's above the video
 
-    // Append overlay to video container
+    Object.assign(overlay.style, {
+      position: "absolute",
+      top: "0",
+      left: "0",
+      width: "100%",
+      height: "100%",
+      background: "rgba(0, 0, 0, 0.7)",
+      color: "#fff",
+      fontSize: "18px",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      cursor: "pointer",
+      zIndex: "10",
+      display: "none" // Initially hidden
+    });
+
     parent.appendChild(overlay);
 
-    // Clicking overlay resumes video
     overlay.addEventListener("click", () => {
-      videoElement.play();
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', "*");
       overlay.style.display = "none";
     });
 
     return overlay;
   }
 
-  function handleVideo(video) {
-    const overlay = createOverlay(video);
+  function handleIframe(iframe) {
+    const overlay = createOverlay(iframe);
 
-    video.addEventListener("pause", () => {
-      overlay.style.display = "flex"; // Show overlay when paused
+    // ✅ Detect when video is paused (Only works for YouTube)
+    window.addEventListener("message", (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.event === "infoDelivery" && data.info && data.info.playerState === 2) {
+          overlay.style.display = "flex"; // Show overlay on pause
+        }
+      } catch (error) {
+        // Ignore non-JSON messages
+      }
     });
 
-    video.addEventListener("play", () => {
-      overlay.style.display = "none"; // Hide overlay when playing
-    });
+    // ✅ Ensure the YouTube player API is enabled
+    if (iframe.src.includes("youtube.com/embed/")) {
+      iframe.src += (iframe.src.includes("?") ? "&" : "?") + "enablejsapi=1";
+    }
+  }
 
-    video.addEventListener("timeupdate", () => {
-      if (video.duration - video.currentTime <= 3) {
-        overlay.style.display = "flex"; // Show overlay 3 seconds before the end
+  function applyOverlayToIframes() {
+    document.querySelectorAll(".blog-card iframe").forEach(iframe => {
+      if (!iframe.dataset.overlayAdded) {
+        handleIframe(iframe);
+        iframe.dataset.overlayAdded = "true"; // Prevent duplicate overlays
       }
     });
   }
 
-  function applyOverlayToVideos() {
-    document.querySelectorAll(".blog-card video").forEach(video => {
-      if (!video.dataset.overlayAdded) {
-        handleVideo(video);
-        video.dataset.overlayAdded = "true"; // Prevent duplicate overlays
-      }
-    });
-  }
-
-  function waitForBlogsContainer() {
+  // ✅ Watch for dynamically added blogs and apply overlays
+  function observeBlogChanges() {
     const blogsContainer = document.getElementById("blogsContainer");
+
     if (!blogsContainer) {
-      setTimeout(waitForBlogsContainer, 100); // Wait until it exists
+      setTimeout(observeBlogChanges, 100); // Retry if container not found
       return;
     }
 
-    // Apply overlay to existing videos
-    applyOverlayToVideos();
+    applyOverlayToIframes(); // Apply to existing iframes
 
-    // Observe dynamically added blog posts
-    const observer = new MutationObserver(() => applyOverlayToVideos());
-    observer.observe(blogsContainer, { childList: true, subtree: true });
+    new MutationObserver(() => applyOverlayToIframes())
+      .observe(blogsContainer, { childList: true, subtree: true });
   }
 
-  waitForBlogsContainer(); // Start checking for blogsContainer
+  observeBlogChanges();
 });

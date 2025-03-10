@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://caredesk.site/</loc>
+    <lastmod>2025-03-10T12:37:04+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+    <image:image>
+      <image:loc>https://caredesk.site/images/logo.png</image:loc>
+      <image:caption>Home Page Banner</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Index Page -->
+  <url>
+    <loc>https://caredesk.site/index.html</loc>
+    <lastmod>2025-03-10T12:37:04+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.00</priority>
+  </url>
+
+  <!-- About Page -->
+  <url>
+    <loc>https://caredesk.site/about.html</loc>
+    <lastmod>2025-03-10T12:37:04+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.90</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://caredesk.site/about.html" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://caredesk.site/es/about.html" />
+  </url>
+
+  <!-- Contact Us Page -->
+  <url>
+    <loc>https://caredesk.site/contact-us.html</loc>
+    <lastmod>2025-03-10T12:37:04+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- blog Page -->
+  <url>
+    <loc>https://caredesk.site/blog.html</loc>
+    <lastmod>2025-03-10T12:37:04+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+/urlset>

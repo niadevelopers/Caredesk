@@ -1,76 +1,59 @@
+
 const express = require('express');
 const multer = require('multer');
 const Blog = require('../models/Blog');
 
 const router = express.Router();
 
-// ✅ Configure multer for uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Store all files in "uploads/" folder
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
+// ✅ Create a new blog post (Fix: Correct Validation for Media URLs)
+router.post('/create', async (req, res) => {
+  try {
+    const { title, content, category, image, video } = req.body;
 
-const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'video/mp4'];
-    if (!allowedTypes.includes(file.mimetype)) {
-      console.error(`Unsupported file type: ${file.mimetype}`);
-      return cb(new Error('Only JPEG, PNG images, and MP4 videos are allowed.'));
+    // ✅ Validate required fields
+    if (!title || !content || !category) {
+      return res.status(400).json({ error: 'Title, content, and category are required.' });
     }
-    cb(null, true);
-  },
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max file size
-});
 
-//  Create a new blog post
-router.post(
-  '/create',
-  upload.fields([
-    { name: 'image', maxCount: 1 },
-    { name: 'video', maxCount: 1 },
-  ]),
-  async (req, res) => {
-    try {
-      const title = req.body.title?.trim();
-      const content = req.body.content?.trim();
-      const category = req.body.category?.trim();
-
-      // ✅ Validate required fields
-      if (!title || !content || !category) {
-        return res.status(400).json({ error: 'Title, content, and category are required.' });
-      }
-
-      // ✅ Process uploaded files
-      const image = req.files['image'] ? `/uploads/${req.files['image'][0].filename}` : null;
-      const video = req.files['video'] ? `/uploads/${req.files['video'][0].filename}` : null;
-
-      if (!image && !video) {
-        return res.status(400).json({ error: 'At least one media file (image or video) is required.' });
-      }
-
-      // ✅ Create and save the blog post
-      const newBlog = new Blog({
-        title,
-        content,
-        category,
-        image,
-        video,
-        likes: 0, // Default likes count
-      });
-      await newBlog.save();
-
-      res.status(201).json({ message: 'Blog created successfully.', blog: newBlog });
-    } catch (err) {
-      console.error('Error creating blog post:', err.message);
-      res.status(500).json({ error: 'Internal server error' });
+    // ✅ Ensure either an image OR a video is provided (Fix: Correct logic)
+    if (!image?.trim() && !video?.trim()) {
+      return res.status(400).json({ error: 'Either an image URL or a video URL is required.' });
     }
+
+    // ✅ Validate URL format
+    const validURL = (url) => url && /^(https?:\/\/)/.test(url);
+
+    if (image && !validURL(image)) {
+      return res.status(400).json({ error: 'Invalid image URL. Ensure it starts with "http" or "https".' });
+    }
+
+    if (video && !validURL(video)) {
+      return res.status(400).json({ error: 'Invalid video URL. Ensure it starts with "http" or "https".' });
+    }
+
+    // ✅ Save the blog with the provided URLs
+    const newBlog = new Blog({
+      title,
+      content,
+      category,
+      image: image?.trim() || null,  // Store only if provided
+      video: video?.trim() || null,  // Store only if provided
+      likes: 0,
+    });
+
+    await newBlog.save();
+    res.status(201).json({ message: 'Blog created successfully.', blog: newBlog });
+  } catch (err) {
+    console.error('Error creating blog post:', err.message);
+    res.status(500).json({ error: 'Internal server error' });
   }
-);
+});
+
+
+
+
+
+
 
 // ✅ Fetch first 15 blogs (for initial page load)
 router.get('/first-blogs', async (req, res) => {
@@ -153,6 +136,7 @@ router.post('/like/:id', async (req, res) => {
 });
 
 // ✅ Generate a shareable blog link
+// ✅ Generate a shareable blog link with correct frontend domain & media preview
 router.get('/share/:id', async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
@@ -160,15 +144,28 @@ router.get('/share/:id', async (req, res) => {
       return res.status(404).json({ error: 'Blog not found.' });
     }
 
-    const previewText = blog.content ? blog.content.substring(0, 40) + "..." : "Check out this blog!";
-    const blogUrl = `${req.protocol}://${req.get('host')}/blog.html?id=${blog._id}`;
+    // ✅ Strip HTML tags from the preview text
+    const previewText = blog.content 
+      ? blog.content.replace(/(<([^>]+)>)/gi, "").substring(0, 40) + "..." 
+      : "Check out this blog!";
 
-    res.status(200).json({ blogUrl, previewText });
+    // ✅ Use the correct frontend domain instead of backend
+    const blogUrl = `https://caredesk.site/blog.html?id=${blog._id}`;
+
+    // ✅ Select the correct media preview (image or video thumbnail)
+    let mediaPreview = blog.image || blog.video;
+    if (blog.video) {
+      mediaPreview += "#t=0,6"; // Show first 6 seconds of the video preview
+    }
+
+    res.status(200).json({ blogUrl, previewText, mediaPreview });
   } catch (err) {
     console.error('Error generating share link:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
 
 // ✅ Delete a blog
 router.delete('/delete/:id', async (req, res) => {

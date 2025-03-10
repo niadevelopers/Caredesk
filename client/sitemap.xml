@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"
         xmlns:xhtml="http://www.w3.org/1999/xhtml"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 
   <!-- Homepage -->
   <url>
@@ -43,7 +43,7 @@
     <priority>0.90</priority>
   </url>
 
-  <!-- blog Page -->
+  <!-- Blog Page -->
   <url>
     <loc>https://caredesk.site/blog.html</loc>
     <lastmod>2025-03-10T12:37:04+00:00</lastmod>
@@ -51,4 +51,4 @@
     <priority>1.0</priority>
   </url>
 
-/urlset>
+</urlset>

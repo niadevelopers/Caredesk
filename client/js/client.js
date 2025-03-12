@@ -10,6 +10,7 @@ async function fetchFirstBlogs() {
   try {
     const response = await fetch('/api/blog/first-blogs');
     blogs = await response.json();
+    blogsContainer.innerHTML = '<p>Loading articles ASAP...</p>';//try message before any blog.
     displayBlogs(blogs);
   } catch (err) {
     console.error('❌ Error fetching first blogs:', err.message);

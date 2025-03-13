@@ -44,7 +44,7 @@ function setNewBlogBadge(isNewBlogAvailable) {
 // Function to update the favicon or title for the badge
 function updateAppBadge(isNewBlogAvailable) {
   if (isNewBlogAvailable) {
-    document.title = "New Blog Available!";
+    document.title = `${count} New Blogs`;  // Using backticks for string template
     // You could also change the favicon to show a dot (using Favico.js or manually updating it)
   } else {
     document.title = "Your Blog App";  // Reset title

@@ -29,12 +29,12 @@ async function fetchBlogs() {
     // Get the number of blogs stored previously
     const storedBlogCount = localStorage.getItem('blogCount') || 0;
     
-    // If the fetched blogs are more than the stored count, it means there is a new blog
-    const isNewBlogAvailable = blogs.length > storedBlogCount;
+    // Calculate the number of new blogs
+    const newBlogCount = blogs.length - storedBlogCount;
 
-    // Force the display of the badge (you can show a toast as well)
-    if (isNewBlogAvailable) {
-      setNewBlogBadge(true, blogs.length);  // Show badge and set new blog count
+    // If new blogs are available
+    if (newBlogCount > 0) {
+      setNewBlogBadge(true, newBlogCount);  // Show badge and set new blog count
     } else {
       setNewBlogBadge(false, 0);  // Hide badge if no new blogs
     }
@@ -51,7 +51,7 @@ async function fetchBlogs() {
 document.addEventListener('DOMContentLoaded', fetchBlogs);
 
 // Function to show or hide the new blog badge (forceful)
-function setNewBlogBadge(isNewBlogAvailable, blogCount) {
+function setNewBlogBadge(isNewBlogAvailable, newBlogCount) {
   const badgeElement = document.getElementById('appBadge');  // The badge element in your UI (can be an icon or div)
   const toastElement = document.getElementById('toastNotification');  // A fallback toast notification element
 
@@ -61,7 +61,7 @@ function setNewBlogBadge(isNewBlogAvailable, blogCount) {
 
     // Show a toast notification to inform the user
     toastElement.style.display = 'block';
-    toastElement.innerHTML = `${blogCount} New Blogs Available!`;  // Show the count in the toast
+    toastElement.innerHTML = `${newBlogCount} New Blogs Available!`;  // Show the new blog count in the toast
     
     // Set timeout to hide the badge and toast notification after 5 seconds
     setTimeout(() => {
@@ -77,13 +77,13 @@ function setNewBlogBadge(isNewBlogAvailable, blogCount) {
   }
   
   // Optionally update the browser tab (favicon or title)
-  updateAppBadge(isNewBlogAvailable, blogCount);  // Pass the blog count to updateAppBadge
+  updateAppBadge(isNewBlogAvailable, newBlogCount);  // Pass the new blog count to updateAppBadge
 }
 
 // Function to update the favicon or title for the badge
-function updateAppBadge(isNewBlogAvailable, blogCount) {
+function updateAppBadge(isNewBlogAvailable, newBlogCount) {
   if (isNewBlogAvailable) {
-    document.title = `${blogCount} New Blogs`;  // Using the blog count instead of undefined 'count'
+    document.title = `${newBlogCount} New Blogs`;  // Using the new blog count
   } else {
     document.title = "Caredesk";  // Reset title
   }

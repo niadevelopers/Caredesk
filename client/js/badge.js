@@ -9,27 +9,29 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// Listen for the message from the service worker
+// Handle messages from the Service Worker
 if (navigator.serviceWorker) {
   navigator.serviceWorker.addEventListener('message', function (event) {
     if (event.data && event.data.type === 'NEW_BLOG') {
-      // Show the app badge
-      const appBadge = document.getElementById('appBadge');
-      appBadge.style.display = 'block'; // Show the badge
-
-      // Show the toast notification
-      const toastNotification = document.getElementById('toastNotification');
-      toastNotification.style.display = 'block'; // Show the toast
-
-      // Hide the toast notification after 5 seconds
-      setTimeout(() => {
-        toastNotification.style.display = 'none';
-      }, 5000); // Duration of toast message
-
-      // Hide the badge after 5 seconds (optional)
-      setTimeout(() => {
-        appBadge.style.display = 'none';
-      }, 5000); // Duration of badge visibility
+      // Show the badge and toast notification
+      showNewBlogBadge(event.data.count);
+      showToastNotification();
     }
   });
+}
+
+// Function to show the New Blog Badge
+function showNewBlogBadge(count) {
+  const appBadge = document.getElementById('appBadge');
+  appBadge.textContent = `New (${count})`;  // Display the number of new blogs
+  appBadge.style.display = 'block'; // Make the badge visible
+}
+
+// Function to show the Toast Notification
+function showToastNotification() {
+  const toastNotification = document.getElementById('toastNotification');
+  toastNotification.style.display = 'block'; // Show the toast
+  setTimeout(() => {
+    toastNotification.style.display = 'none'; // Hide the toast after 3 seconds
+  }, 3000);
 }

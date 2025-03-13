@@ -1,3 +1,14 @@
+// Register the Service Worker in the main file (this could be your index.js or badge.js)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+    .then((registration) => {
+      console.log('Service Worker Registered:', registration);
+    })
+    .catch((error) => {
+      console.error('Service Worker Registration Failed:', error);
+    });
+}
+
 // Function to fetch blogs from your API
 async function fetchBlogs() {
   try {
@@ -8,13 +19,17 @@ async function fetchBlogs() {
     const storedBlogCount = localStorage.getItem('blogCount') || 0;
     
     // If the fetched blogs are more than the stored count, it means there is a new blog
-    const isNewBlogAvailable = blogs.length > storedBlogCount;
-
-    // Force the display of the badge (you can show a toast as well)
-    if (isNewBlogAvailable) {
-      setNewBlogBadge(true, blogs.length);  // Show badge and set new blog count
+    if (blogs.length > storedBlogCount) {
+      // Send a message to the service worker that there's a new blog
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'NEW_BLOG',
+          count: blogs.length
+        });
+      }
+      setNewBlogBadge(true, blogs.length);  // Show the badge
     } else {
-      setNewBlogBadge(false, 0);  // Hide badge if no new blogs
+      setNewBlogBadge(false, 0);  // No new blogs, hide the badge
     }
     
     // Update the blog count in localStorage
@@ -28,24 +43,16 @@ async function fetchBlogs() {
 // Call the function when the page loads to check for new blogs
 document.addEventListener('DOMContentLoaded', fetchBlogs);
 
-// Function to show or hide the new blog badge (forceful)
+// Function to show or hide the new blog badge
 function setNewBlogBadge(isNewBlogAvailable, blogCount) {
   const badgeElement = document.getElementById('appBadge');  // The badge element in your UI (can be an icon or div)
-  const toastElement = document.getElementById('toastNotification');  // A fallback toast notification element
-
+  
   if (isNewBlogAvailable) {
-    // Forcefully show the badge or dot (you can style it as a dot or a number)
+    // Show the badge or dot (you can style it as a dot or a number)
     badgeElement.style.display = 'block';
-
-    // Show a toast notification to inform the user
-    toastElement.style.display = 'block';
-    toastElement.innerHTML = `${blogCount} New Blogs Available!`;  // Show the count in the toast
   } else {
     // Hide the badge if no new blog
     badgeElement.style.display = 'none';
-
-    // Hide the toast if no new blog
-    toastElement.style.display = 'none';
   }
   
   // Optionally update the browser tab (favicon or title)
@@ -56,6 +63,7 @@ function setNewBlogBadge(isNewBlogAvailable, blogCount) {
 function updateAppBadge(isNewBlogAvailable, blogCount) {
   if (isNewBlogAvailable) {
     document.title = `${blogCount} New Blogs`;  // Using the blog count instead of undefined 'count'
+    // You could also change the favicon to show a dot (using Favico.js or manually updating it)
   } else {
     document.title = "Caredesk";  // Reset title
   }

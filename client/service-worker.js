@@ -25,7 +25,7 @@ self.addEventListener('message', (event) => {
     // Update the badge if there's a new blog
     self.registration.showNotification('New Blog Available!', {
       body: `You have ${event.data.count} new blogs.`,
-      icon: 'images/logo.png',
+      icon: 'favicon-32x32.png',
     });
   }
 });

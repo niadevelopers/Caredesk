@@ -9,9 +9,9 @@ async function fetchBlogs() {
     
     // If the fetched blogs are more than the stored count, it means there is a new blog
     if (blogs.length > storedBlogCount) {
-      setNewBlogBadge(true);  // Set badge if a new blog is available
+      setNewBlogBadge(true, blogs.length);  // Pass the blog count to updateAppBadge
     } else {
-      setNewBlogBadge(false);  // Reset badge if no new blog
+      setNewBlogBadge(false, 0);  // No new blogs, set count to 0
     }
     
     // Update the blog count in localStorage
@@ -26,7 +26,7 @@ async function fetchBlogs() {
 document.addEventListener('DOMContentLoaded', fetchBlogs);
 
 // Function to show or hide the new blog badge
-function setNewBlogBadge(isNewBlogAvailable) {
+function setNewBlogBadge(isNewBlogAvailable, blogCount) {
   const badgeElement = document.getElementById('appBadge');  // The badge element in your UI (can be an icon or div)
   
   if (isNewBlogAvailable) {
@@ -38,13 +38,13 @@ function setNewBlogBadge(isNewBlogAvailable) {
   }
   
   // Optionally update the browser tab (favicon or title)
-  updateAppBadge(isNewBlogAvailable);
+  updateAppBadge(isNewBlogAvailable, blogCount);  // Pass the blog count to updateAppBadge
 }
 
 // Function to update the favicon or title for the badge
-function updateAppBadge(isNewBlogAvailable) {
+function updateAppBadge(isNewBlogAvailable, blogCount) {
   if (isNewBlogAvailable) {
-    document.title = `${count} New Blogs`;  // Using backticks for string template
+    document.title = `${blogCount} New Blogs`;  // Using the blog count instead of undefined 'count'
     // You could also change the favicon to show a dot (using Favico.js or manually updating it)
   } else {
     document.title = "Caredesk";  // Reset title

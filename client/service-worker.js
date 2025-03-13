@@ -22,12 +22,12 @@ self.addEventListener('fetch', (event) => {
 // Listen for messages from the main app (badge.js)
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'NEW_BLOG') {
-    // Send a message to the main app to show the badge and toast
+    // Notify the frontend that there is a new blog
     self.clients.matchAll().then(clients => {
       clients.forEach(client => {
         client.postMessage({
           type: 'NEW_BLOG',
-          count: event.data.count
+          count: event.data.count // The number of new blogs
         });
       });
     });

@@ -19,6 +19,7 @@ if (navigator.serviceWorker) {
     }
   });
 }
+
 // Function to fetch blogs from your API
 async function fetchBlogs() {
   try {
@@ -61,6 +62,12 @@ function setNewBlogBadge(isNewBlogAvailable, blogCount) {
     // Show a toast notification to inform the user
     toastElement.style.display = 'block';
     toastElement.innerHTML = `${blogCount} New Blogs Available!`;  // Show the count in the toast
+    
+    // Set timeout to hide the badge and toast notification after 5 seconds
+    setTimeout(() => {
+      badgeElement.style.display = 'none';
+      toastElement.style.display = 'none';
+    }, 5000);  // 5000 milliseconds = 5 seconds
   } else {
     // Hide the badge if no new blog
     badgeElement.style.display = 'none';

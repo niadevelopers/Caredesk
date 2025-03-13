@@ -22,10 +22,22 @@ self.addEventListener('fetch', (event) => {
 // Listen for messages from the main app (badge.js)
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'NEW_BLOG') {
-    // Update the badge if there's a new blog
+    const newBlogsCount = event.data.count;  // Get the count of new blogs
+    
+    // Show the notification with the count of new blogs
     self.registration.showNotification('New Blog Available!', {
-      body: `You have ${event.data.count} new blogs.`,
+      body: `You have ${newBlogsCount} new blogs.`,
       icon: 'favicon-32x32.png',
+      badge: 'favicon-32x32.png',  // The badge icon that will be shown
     });
+
+    // If the device supports app badges (Chrome on Android), set the badge on the app icon
+    if ('setAppBadge' in navigator) {
+      navigator.setAppBadge(newBlogsCount).then(() => {
+        console.log('App badge updated successfully');
+      }).catch((error) => {
+        console.error('Failed to update app badge:', error);
+      });
+    }
   }
 });

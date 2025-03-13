@@ -1,7 +1,7 @@
 // Function to fetch blogs from your API
 async function fetchBlogs() {
   try {
-    const response = await fetch('/first-blogs');  // Your API endpoint to fetch blogs
+    const response = await fetch('api/blog/first-blogs');  // Your API endpoint to fetch blogs
     const blogs = await response.json();
     
     // Get the number of blogs stored previously

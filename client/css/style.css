@@ -602,7 +602,6 @@ footer {
         transform: scale(1.05);
     }
 }
-
 #toastNotification {
   display: none;
   position: fixed;
@@ -620,41 +619,20 @@ footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  animation: slideIn 0.5s ease, fadeOut 0.5s 8.5s forwards; /* Adjusted timing */
 }
 
-#toastNotification span {
-  font-weight: bold;
-}
-
+/* Bell Icon */
 #toastNotification::before {
   content: "🔔"; /* Add a bell icon before the message */
   margin-right: 10px;
 }
 
+/* Hover Effect */
 #toastNotification:hover {
-  background-color: #444; /* Darken background on hover */
+  background-color: #444;
   cursor: pointer;
 }
 
-/* Animation for sliding in */
-@keyframes slideIn {
-  from {
-    transform: translateX(-50%) translateY(100%);
-  }
-  to {
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
-/* Animation for fading out */
-@keyframes fadeOut {
-  to {
-    opacity: 0;
-    bottom: -100px;
-  }
-}
-
 /* Responsive Design */
 @media screen and (max-width: 768px) {
   #toastNotification {
@@ -669,21 +647,3 @@ footer {
     font-size: 12px;
   }
 }
-
-
-/* Responsive Design */
-@media screen and (max-width: 768px) {
-  #toastNotification {
-    padding: 12px 20px;
-    font-size: 14px;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  #toastNotification {
-    padding: 10px 15px;
-    font-size: 12px;
-  }
-}
-
-

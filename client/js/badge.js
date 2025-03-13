@@ -67,7 +67,7 @@ function setNewBlogBadge(isNewBlogAvailable, newBlogCount) {
     setTimeout(() => {
       badgeElement.style.display = 'none';
       toastElement.style.display = 'none';
-    }, 5000);  // 5000 milliseconds = 5 seconds
+    }, 9000);  // 9000 milliseconds = 9 seconds
   } else {
     // Hide the badge if no new blog
     badgeElement.style.display = 'none';

@@ -28,9 +28,9 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Email, password, and role are required.' });
     }
 
-    // Check if the number of admins exceeds or equals 10
+    // Check if the number of admins exceeds or equals 2
     const adminCount = await Admin.countDocuments();
-    if (adminCount >= 10) {
+    if (adminCount >= 2) {
       return res.status(403).json({ error: 'The maximum number of admins has been reached. You cannot register more admins.' });
     }
 

@@ -57,8 +57,8 @@ async function fetchTotalBlogCount() {
     // ✅ Store the latest count
     localStorage.setItem('blogCount', totalBlogCount);
 
-    // ✅ Assume that the user has read all the blogs after loading the app
-    markAllBlogsAsRead();
+    // ✅ When the app is loaded, assume all blogs are read and reset title
+    resetAppTitle();
 
   } catch (error) {
     console.error('Error fetching total blog count:', error);
@@ -93,19 +93,13 @@ function setNewBlogBadge(isNewBlogAvailable, newBlogCount) {
 // ✅ Function to update favicon or title badge
 function updateAppBadge(isNewBlogAvailable, newBlogCount) {
   if (isNewBlogAvailable) {
-    document.title = `${newBlogCount} New Blogs`;
+    document.title = `${newBlogCount} New Blogs`;  // Set the title to "X New Blogs"
   } else {
-    document.title = "Caredesk";
+    document.title = "Caredesk";  // Default title when no new blogs
   }
 }
 
-// ✅ Mark all blogs as read when the app loads (assuming user has seen all)
-function markAllBlogsAsRead() {
-  // After loading blogs, assume all are read and reset title
-  resetAppTitle();
-}
-
-// ✅ Reset the app title after assuming all blogs are read
+// ✅ Reset the app title to 'Caredesk' after the app is loaded (assumes all blogs are read)
 function resetAppTitle() {
-  document.title = "Caredesk"; // Reset to default title
+  document.title = "Caredesk"; // Reset to default title when the app is opened
 }

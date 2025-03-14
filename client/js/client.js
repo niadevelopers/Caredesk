@@ -1,8 +1,8 @@
-
 const blogsContainer = document.getElementById('blogs');
 const searchBar = document.getElementById('search-bar');
 const categoryLinks = document.getElementById('categories');
-let blogs = []; // Stores all blogs fetched from the server
+let blogs = []; // Stores only currently displayed blogs
+let allFetchedBlogs = []; // Stores all blogs fetched so far (even hidden ones)
 let blogOffset = 15; // Keeps track of how many blogs have been loaded
 
 // ✅ Fetch & Display the First 15 Blogs Instantly
@@ -10,7 +10,9 @@ async function fetchFirstBlogs() {
   try {
     const response = await fetch('/api/blog/first-blogs');
     blogs = await response.json();
-    blogsContainer.innerHTML = '<p>Loading articles ASAP...</p>';//try message before any blog.
+    blogsContainer.innerHTML = '<p>Loading articles ASAP...</p>';
+    
+    storeFetchedBlogs(blogs); // ✅ Store globally
     displayBlogs(blogs);
   } catch (err) {
     console.error('❌ Error fetching first blogs:', err.message);
@@ -18,13 +20,14 @@ async function fetchFirstBlogs() {
   }
 }
 
-//Fetch & Display More Blogs in the Background
+// ✅ Fetch & Display More Blogs in the Background
 async function fetchMoreBlogs() {
   try {
     const response = await fetch(`/api/blog/more-blogs?skip=${blogOffset}`);
     const newBlogs = await response.json();
 
     if (newBlogs.length > 0) {
+      storeFetchedBlogs(newBlogs); // ✅ Store globally
       displayBlogs(newBlogs, true);
       blogOffset += newBlogs.length;
     } else {
@@ -35,7 +38,7 @@ async function fetchMoreBlogs() {
   }
 }
 
-//Fetch Blogs by Category (Loads 15 at a Time)
+// ✅ Fetch Blogs by Category (Loads 15 at a Time)
 async function fetchBlogsByCategory(category, page = 1, append = false) {
   try {
     const response = await fetch(`/api/blog/category/${category}?page=${page}`);
@@ -45,6 +48,7 @@ async function fetchBlogsByCategory(category, page = 1, append = false) {
       blogsContainer.innerHTML = ''; 
     }
 
+    storeFetchedBlogs(categoryBlogs); // ✅ Store globally
     displayBlogs(categoryBlogs, append);
 
     if (hasMore) {
@@ -55,18 +59,15 @@ async function fetchBlogsByCategory(category, page = 1, append = false) {
   }
 }
 
-//display blogs
-// ✅ Modified function to display blogs and store them globally
-function displayBlogs(blogsToDisplay, append = false) {
-  if (!append) {
-    blogsContainer.innerHTML = ''; // Clear only if not appending
-  }
-
-  // ✅ Store all fetched blogs to keep track of them even if hidden later
-  blogs = [...blogs, ...blogsToDisplay].filter((blog, index, self) =>
-    index === self.findIndex((b) => b._id === blog._id) // Avoid duplicates
+// ✅ Store All Fetched Blogs to Ensure Search Works
+function storeFetchedBlogs(newBlogs) {
+  allFetchedBlogs = [...allFetchedBlogs, ...newBlogs].filter((blog, index, self) =>
+    index === self.findIndex((b) => b._id === blog._id) // ✅ Remove duplicates
   );
+}
 
+// ✅ Display Blogs Function
+function displayBlogs(blogsToDisplay, append = false) {
   const blogHTML = blogsToDisplay.map(blog => {
     let mediaElement = "";
 
@@ -105,21 +106,88 @@ function displayBlogs(blogsToDisplay, append = false) {
     `;
   }).join('');
 
-  blogsContainer.innerHTML += blogHTML;
+  if (append) {
+    blogsContainer.innerHTML += blogHTML;
+  } else {
+    blogsContainer.innerHTML = blogHTML;
+  }
 }
+
+
+// ✅ Helper Functions to Identify Video Platforms
+function isYouTubeLink(url) {
+    return url.includes("youtube.com") || url.includes("youtu.be");
+  }
+  
+  function isTikTokLink(url) {
+    return url.includes("tiktok.com");
+  }
+  
+  function isFacebookLink(url) {
+    return url.includes("facebook.com") || url.includes("fb.watch");
+  }
+  
+  // ✅ Extract YouTube Video ID
+  function extractYouTubeVideoID(url) {
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:.*v=|.*\/v\/|.*vi=|.*\/vi\/|.*\/embed\/|.*\/shorts\/|.*v%3D|.*vi%3D))([^?&/%]+)/);
+    return match ? match[1] : null;
+  }
+  
+  // ✅ Extract TikTok Video ID
+  function extractTikTokVideoID(url) {
+    const match = url.match(/video\/(\d+)/);
+    return match ? match[1] : null;
+  }
+
+  
+//like a blog and only refresh the liked blog 
+async function likeBlog(id) {
+    try {
+      const response = await fetch(`/api/blog/like/${id}`, { method: 'POST' });
+  
+      if (response.ok) {
+        const { likes, blogId } = await response.json();
+  
+        const blogCard = blogsContainer.querySelector(`[data-id="${blogId}"]`);
+        if (blogCard) {
+          const likeCountSpan = blogCard.querySelector('.like-count');
+          if (likeCountSpan) {
+            likeCountSpan.textContent = likes;
+          }
+        }
+      } else {
+        console.error('❌ Failed to like the blog:', response.statusText);
+      }
+    } catch (err) {
+      console.error('❌ Error liking blog:', err.message);
+    }
+  }
+
+  
+//Create & Attach "Load More" Button
+function renderLoadMoreButton(category, nextPage) {
+    const loadMoreBtn = document.createElement('button');
+    loadMoreBtn.textContent = 'Load More';
+    loadMoreBtn.id = 'loadMoreBtn';
+    loadMoreBtn.classList.add('load-more-btn');
+    loadMoreBtn.onclick = () => fetchBlogsByCategory(category, nextPage, true);
+  
+    document.querySelector('.load-more-btn')?.remove();
+    blogsContainer.insertAdjacentElement('afterend', loadMoreBtn);
+  }
 
 // ✅ Updated Search Function (Search ALL Fetched Blogs)
 searchBar.addEventListener('input', () => {
   const query = searchBar.value.toLowerCase().trim();
   if (query === "") {
-    displayBlogs(blogs); // Show all fetched blogs when search is cleared
+    displayBlogs(allFetchedBlogs); // ✅ Show all blogs when search is cleared
     return;
   }
 
-  const keywords = query.split(/\s+/);
+  const keywords = query.split(/\s+/); // ✅ Split input into words
 
-  // ✅ Search ALL blogs, including those previously loaded but not currently visible
-  const filteredBlogs = blogs.filter(blog =>
+  // ✅ Search across ALL fetched blogs
+  const filteredBlogs = allFetchedBlogs.filter(blog =>
     keywords.some(keyword =>
       blog.title.toLowerCase().includes(keyword) ||
       blog.content.toLowerCase().includes(keyword)
@@ -129,153 +197,7 @@ searchBar.addEventListener('input', () => {
   displayBlogs(filteredBlogs);
 });
 
-
-// ✅ Helper Functions to Identify Video Platforms
-function isYouTubeLink(url) {
-  return url.includes("youtube.com") || url.includes("youtu.be");
-}
-
-function isTikTokLink(url) {
-  return url.includes("tiktok.com");
-}
-
-function isFacebookLink(url) {
-  return url.includes("facebook.com") || url.includes("fb.watch");
-}
-
-// ✅ Extract YouTube Video ID
-function extractYouTubeVideoID(url) {
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:.*v=|.*\/v\/|.*vi=|.*\/vi\/|.*\/embed\/|.*\/shorts\/|.*v%3D|.*vi%3D))([^?&/%]+)/);
-  return match ? match[1] : null;
-}
-
-// ✅ Extract TikTok Video ID
-function extractTikTokVideoID(url) {
-  const match = url.match(/video\/(\d+)/);
-  return match ? match[1] : null;
-}
-
-//like a blog and only refresh the liked blog 
-async function likeBlog(id) {
-  try {
-    const response = await fetch(`/api/blog/like/${id}`, { method: 'POST' });
-
-    if (response.ok) {
-      const { likes, blogId } = await response.json();
-
-      const blogCard = blogsContainer.querySelector(`[data-id="${blogId}"]`);
-      if (blogCard) {
-        const likeCountSpan = blogCard.querySelector('.like-count');
-        if (likeCountSpan) {
-          likeCountSpan.textContent = likes;
-        }
-      }
-    } else {
-      console.error('❌ Failed to like the blog:', response.statusText);
-    }
-  } catch (err) {
-    console.error('❌ Error liking blog:', err.message);
-  }
-}
-
-//Create & Attach "Load More" Button
-function renderLoadMoreButton(category, nextPage) {
-  const loadMoreBtn = document.createElement('button');
-  loadMoreBtn.textContent = 'Load More';
-  loadMoreBtn.id = 'loadMoreBtn';
-  loadMoreBtn.classList.add('load-more-btn');
-  loadMoreBtn.onclick = () => fetchBlogsByCategory(category, nextPage, true);
-
-  document.querySelector('.load-more-btn')?.remove();
-  blogsContainer.insertAdjacentElement('afterend', loadMoreBtn);
-}
-
-
-
-const shareBlog = async (id) => {
-  try {
-    const response = await fetch(`/api/blog/share/${id}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch blog share link');
-    }
-
-    const data = await response.json();
-    const blogUrl = data.blogUrl;
-    const previewText = data.previewText;
-    const mediaPreview = data.mediaPreview; // ✅ Image or video preview
-
-    const shareText = `📢 ${previewText} Read more: 👇 ${blogUrl}`;
-
-    // ✅ Social Media Share Links (with media preview support)
-    const shareLinks = {
-      whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`,
-      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(blogUrl)}&quote=${encodeURIComponent(shareText)}`,
-      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(blogUrl)}`,
-    };
-
-    // ✅ Share Popup UI (includes media preview)
-    const sharePopup = `
-      <div class="share-popup">
-        <h3>📢 Share this Blog</h3>
-        ${mediaPreview ? `<img src="${mediaPreview}" class="share-preview-media" alt="Preview" />` : ''}
-        <p>${previewText}</p>
-        <a href="${shareLinks.whatsapp}" target="_blank" class="fab fa-whatsapp" title="Share on WhatsApp"></a>
-        <a href="${shareLinks.twitter}" target="_blank" class="fab fa-twitter" title="Share on Twitter"></a>
-        <a href="${shareLinks.facebook}" target="_blank" class="fab fa-facebook" title="Share on Facebook"></a>
-        <a href="${shareLinks.linkedin}" target="_blank" class="fab fa-linkedin" title="Share on LinkedIn"></a>
-        <button onclick="closeSharePopup()">❌ Close</button>
-      </div>
-    `;
-
-    document.body.insertAdjacentHTML('beforeend', sharePopup);
-  } catch (err) {
-    console.error('Error sharing blog:', err.message);
-  }
-};
-
-// ✅ Close the share popup
-const closeSharePopup = () => {
-  const popup = document.querySelector('.share-popup');
-  if (popup) {
-    popup.remove();
-  }
-};
-
-
-
-// ✅ Function to Update Open Graph & Twitter Meta Tags
-function updateMetaTags(blog) {
-  document.getElementById("og-title").setAttribute("content", blog.title);
-  document.getElementById("og-description").setAttribute("content", blog.content.substring(0, 100));
-  document.getElementById("og-url").setAttribute("content", window.location.href);
-
-  // ✅ Show Blog Image if Available, Otherwise Show Video Thumbnail
-  if (blog.image) {
-    document.getElementById("og-image").setAttribute("content", blog.image);
-    document.getElementById("twitter-image").setAttribute("content", blog.image);
-  } else if (blog.video) {
-    document.getElementById("og-image").setAttribute("content", `https://img.youtube.com/vi/${extractVideoID(blog.video)}/hqdefault.jpg`);
-    document.getElementById("twitter-image").setAttribute("content", `https://img.youtube.com/vi/${extractVideoID(blog.video)}/hqdefault.jpg`);
-  }
-
-  document.getElementById("twitter-title").setAttribute("content", blog.title);
-  document.getElementById("twitter-description").setAttribute("content", blog.content.substring(0, 100));
-}
-
-
-// ✅ Automatically Update Meta Tags When a Blog is Opened
-document.addEventListener("DOMContentLoaded", () => {
-  const blogId = new URLSearchParams(window.location.search).get("id");
-  if (blogId) {
-    fetch(`/api/blog/${blogId}`)
-      .then((res) => res.json())
-      .then((blog) => updateMetaTags(blog))
-      .catch((err) => console.error("Error fetching blog details:", err));
-  }
-});
-
-
+// ✅ Category Click Handling
 categoryLinks.addEventListener('click', (e) => {
   e.preventDefault();
   if (e.target.tagName === 'A') {
@@ -288,6 +210,86 @@ categoryLinks.addEventListener('click', (e) => {
   }
 });
 
-fetchFirstBlogs();
 
+const shareBlog = async (id) => {
+    try {
+      const response = await fetch(`/api/blog/share/${id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch blog share link');
+      }
+  
+      const data = await response.json();
+      const blogUrl = data.blogUrl;
+      const previewText = data.previewText;
+      const mediaPreview = data.mediaPreview; // ✅ Image or video preview
+  
+      const shareText = `📢 ${previewText} Read more: 👇 ${blogUrl}`;
+  
+      // ✅ Social Media Share Links (with media preview support)
+      const shareLinks = {
+        whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`,
+        twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`,
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(blogUrl)}&quote=${encodeURIComponent(shareText)}`,
+        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(blogUrl)}`,
+      };
+     // ✅ Share Popup UI (includes media preview)
+     const sharePopup = `
+     <div class="share-popup">
+       <h3>📢 Share this Blog</h3>
+       ${mediaPreview ? `<img src="${mediaPreview}" class="share-preview-media" alt="Preview" />` : ''}
+       <p>${previewText}</p>
+       <a href="${shareLinks.whatsapp}" target="_blank" class="fab fa-whatsapp" title="Share on WhatsApp"></a>
+       <a href="${shareLinks.twitter}" target="_blank" class="fab fa-twitter" title="Share on Twitter"></a>
+       <a href="${shareLinks.facebook}" target="_blank" class="fab fa-facebook" title="Share on Facebook"></a>
+       <a href="${shareLinks.linkedin}" target="_blank" class="fab fa-linkedin" title="Share on LinkedIn"></a>
+       <button onclick="closeSharePopup()">❌ Close</button>
+     </div>
+   `;
+
+   document.body.insertAdjacentHTML('beforeend', sharePopup);
+ } catch (err) {
+   console.error('Error sharing blog:', err.message);
+ }
+};
+
+// ✅ Close the share popup
+const closeSharePopup = () => {
+    const popup = document.querySelector('.share-popup');
+    if (popup) {
+      popup.remove();
+    }
+  };
+
+// ✅ Function to Update Open Graph & Twitter Meta Tags
+function updateMetaTags(blog) {
+    document.getElementById("og-title").setAttribute("content", blog.title);
+    document.getElementById("og-description").setAttribute("content", blog.content.substring(0, 100));
+    document.getElementById("og-url").setAttribute("content", window.location.href);
+  
+    // ✅ Show Blog Image if Available, Otherwise Show Video Thumbnail
+    if (blog.image) {
+      document.getElementById("og-image").setAttribute("content", blog.image);
+      document.getElementById("twitter-image").setAttribute("content", blog.image);
+    } else if (blog.video) {
+      document.getElementById("og-image").setAttribute("content", `https://img.youtube.com/vi/${extractVideoID(blog.video)}/hqdefault.jpg`);
+      document.getElementById("twitter-image").setAttribute("content", `https://img.youtube.com/vi/${extractVideoID(blog.video)}/hqdefault.jpg`);
+    }
+  
+    document.getElementById("twitter-title").setAttribute("content", blog.title);
+    document.getElementById("twitter-description").setAttribute("content", blog.content.substring(0, 100));
+  }
+  
+// ✅ Automatically Update Meta Tags When a Blog is Opened
+document.addEventListener("DOMContentLoaded", () => {
+    const blogId = new URLSearchParams(window.location.search).get("id");
+    if (blogId) {
+      fetch(`/api/blog/${blogId}`)
+        .then((res) => res.json())
+        .then((blog) => updateMetaTags(blog))
+        .catch((err) => console.error("Error fetching blog details:", err));
+    }
+  });  
+
+// ✅ Load First Blogs on Page Load
+fetchFirstBlogs();
 document.getElementById('loadMoreBtn')?.addEventListener('click', fetchMoreBlogs);

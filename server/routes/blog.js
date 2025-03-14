@@ -145,7 +145,7 @@ router.get('/share/:id', async (req, res) => {
 
     // ✅ Strip HTML tags from the preview text
     const previewText = blog.content 
-      ? blog.content.replace(/(<([^>]+)>)/gi, "").substring(0, 40) + "..." 
+      ? blog.content.replace(/(<([^>]+)>)/gi, "").substring(0, 100) + "..." 
       : "Check out this blog!";
 
     // ✅ Use the correct frontend domain instead of backend

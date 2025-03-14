@@ -20,10 +20,22 @@ style.textContent = `
 .dot {
     width: 12px; /* Increased initial size of dots */
     height: 12px;
-    background-color: white; /* Dot color */
     border-radius: 50%; /* Make dots circular */
     margin: 0 5px; /* Horizontal space between dots */
     animation: dot-blink 1.5s infinite; /* Apply blinking animation */
+}
+
+/* Dot colors */
+.dot:nth-child(1) {
+    background-color: rgba(255, 255, 128, 0.5); /* Faint yellow */
+}
+
+.dot:nth-child(2) {
+    background-color: rgba(255, 255, 0, 0.75); /* Bright yellow */
+}
+
+.dot:nth-child(3) {
+    background-color: rgba(255, 204, 0, 1); /* Deep yellow */
 }
 
 /* Dot blinking animation */

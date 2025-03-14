@@ -56,11 +56,20 @@ async function fetchBlogsByCategory(category, page = 1, append = false) {
 }
 
 //display blogs
+// ✅ Modified function to display blogs and store them globally
 function displayBlogs(blogsToDisplay, append = false) {
+  if (!append) {
+    blogsContainer.innerHTML = ''; // Clear only if not appending
+  }
+
+  // ✅ Store all fetched blogs to keep track of them even if hidden later
+  blogs = [...blogs, ...blogsToDisplay].filter((blog, index, self) =>
+    index === self.findIndex((b) => b._id === blog._id) // Avoid duplicates
+  );
+
   const blogHTML = blogsToDisplay.map(blog => {
     let mediaElement = "";
 
-    // ✅ Check if a video link is present and determine its platform
     if (blog.video) {
       if (isYouTubeLink(blog.video)) {
         const videoId = extractYouTubeVideoID(blog.video);
@@ -76,9 +85,7 @@ function displayBlogs(blogsToDisplay, append = false) {
       } else {
         mediaElement = `<a href="${blog.video}" target="_blank">Watch Video</a>`;
       }
-    }
-    // ✅ Display Image if available
-    else if (blog.image) {
+    } else if (blog.image) {
       mediaElement = `<img src="${blog.image}" alt="${blog.title}" />`;
     }
 
@@ -98,12 +105,30 @@ function displayBlogs(blogsToDisplay, append = false) {
     `;
   }).join('');
 
-  if (append) {
-    blogsContainer.innerHTML += blogHTML;
-  } else {
-    blogsContainer.innerHTML = blogHTML;
-  }
+  blogsContainer.innerHTML += blogHTML;
 }
+
+// ✅ Updated Search Function (Search ALL Fetched Blogs)
+searchBar.addEventListener('input', () => {
+  const query = searchBar.value.toLowerCase().trim();
+  if (query === "") {
+    displayBlogs(blogs); // Show all fetched blogs when search is cleared
+    return;
+  }
+
+  const keywords = query.split(/\s+/);
+
+  // ✅ Search ALL blogs, including those previously loaded but not currently visible
+  const filteredBlogs = blogs.filter(blog =>
+    keywords.some(keyword =>
+      blog.title.toLowerCase().includes(keyword) ||
+      blog.content.toLowerCase().includes(keyword)
+    )
+  );
+
+  displayBlogs(filteredBlogs);
+});
+
 
 // ✅ Helper Functions to Identify Video Platforms
 function isYouTubeLink(url) {
@@ -164,28 +189,6 @@ function renderLoadMoreButton(category, nextPage) {
   document.querySelector('.load-more-btn')?.remove();
   blogsContainer.insertAdjacentElement('afterend', loadMoreBtn);
 }
-
-
-searchBar.addEventListener('input', () => {
-  const query = searchBar.value.toLowerCase().trim();
-
-  if (query === "") {
-    displayBlogs(blogs); // If search is empty, show all blogs
-    return;
-  }
-
-  const keywords = query.split(/\s+/); // Split input into words
-
-  // ✅ Filter blogs where *any* keyword appears in the title or content
-  const filteredBlogs = blogs.filter(blog =>
-    keywords.some(keyword =>
-      blog.title.toLowerCase().includes(keyword) ||
-      blog.content.toLowerCase().includes(keyword)
-    )
-  );
-
-  displayBlogs(filteredBlogs);
-});
 
 
 

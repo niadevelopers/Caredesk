@@ -1,4 +1,4 @@
-// Register the service worker
+// ✅ Register the service worker
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js')
     .then(registration => {
@@ -9,82 +9,89 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// Handle messages from the Service Worker
+// ✅ Handle messages from the Service Worker
 if (navigator.serviceWorker) {
   navigator.serviceWorker.addEventListener('message', function (event) {
     if (event.data && event.data.type === 'NEW_BLOG') {
-      // Show the badge and toast notification
       showNewBlogBadge(event.data.count);
       showToastNotification();
     }
   });
 }
 
-// Function to fetch blogs from your API
-async function fetchBlogs() {
+// ✅ Fetch the total number of blogs (includes pagination)
+async function fetchTotalBlogCount() {
   try {
-    const response = await fetch('api/blog/first-blogs');  // Your API endpoint to fetch blogs
-    const blogs = await response.json();
+    const response = await fetch('/api/blog/first-blogs'); // Fetch first 15 blogs
+    const firstBatch = await response.json();
     
-    // Get the number of blogs stored previously
-    const storedBlogCount = localStorage.getItem('blogCount') || 0;
-    
-    // Calculate the number of new blogs
-    const newBlogCount = blogs.length - storedBlogCount;
+    const totalFirstBatchCount = firstBatch.length; // Should be 15 initially
+    let totalBlogCount = totalFirstBatchCount;
 
-    // If new blogs are available
-    if (newBlogCount > 0) {
-      setNewBlogBadge(true, newBlogCount);  // Show badge and set new blog count
-    } else {
-      setNewBlogBadge(false, 0);  // Hide badge if no new blogs
+    // ✅ Fetch additional blogs in batches of 15 and count them all
+    let skip = 15;
+    let hasMore = totalFirstBatchCount === 15; // If we got 15, there may be more
+
+    while (hasMore) {
+      const response = await fetch(`/api/blog/more-blogs?skip=${skip}`);
+      const nextBatch = await response.json();
+
+      if (nextBatch.length > 0) {
+        totalBlogCount += nextBatch.length;
+        skip += 15;
+      } else {
+        hasMore = false; // Stop fetching if no more blogs
+      }
     }
-    
-    // Update the blog count in localStorage
-    localStorage.setItem('blogCount', blogs.length);
+
+    // ✅ Compare with stored count
+    const storedBlogCount = localStorage.getItem('blogCount') || 0;
+    const newBlogCount = totalBlogCount - storedBlogCount;
+
+    if (newBlogCount > 0) {
+      setNewBlogBadge(true, newBlogCount);
+    } else {
+      setNewBlogBadge(false, 0);
+    }
+
+    // ✅ Store the latest count
+    localStorage.setItem('blogCount', totalBlogCount);
 
   } catch (error) {
-    console.error('Error fetching blogs:', error);
+    console.error('Error fetching total blog count:', error);
   }
 }
 
-// Call the function when the page loads to check for new blogs
-document.addEventListener('DOMContentLoaded', fetchBlogs);
+// ✅ Call this when the page loads
+document.addEventListener('DOMContentLoaded', fetchTotalBlogCount);
 
-// Function to show or hide the new blog badge (forceful)
+// ✅ Function to show or hide the new blog badge
 function setNewBlogBadge(isNewBlogAvailable, newBlogCount) {
-  const badgeElement = document.getElementById('appBadge');  // The badge element in your UI (can be an icon or div)
-  const toastElement = document.getElementById('toastNotification');  // A fallback toast notification element
+  const badgeElement = document.getElementById('appBadge');
+  const toastElement = document.getElementById('toastNotification');
 
   if (isNewBlogAvailable) {
-    // Forcefully show the badge or dot (you can style it as a dot or a number)
     badgeElement.style.display = 'block';
-
-    // Show a toast notification to inform the user
     toastElement.style.display = 'block';
-    toastElement.innerHTML = `${newBlogCount} New Blogs Available!`;  // Show the new blog count in the toast
-    
-    // Set timeout to hide the badge and toast notification after 5 seconds
+    toastElement.innerHTML = `${newBlogCount} New Blogs Available!`;
+
     setTimeout(() => {
       badgeElement.style.display = 'none';
       toastElement.style.display = 'none';
-    }, 9000);  // 9000 milliseconds = 9 seconds
+    }, 9000);
   } else {
-    // Hide the badge if no new blog
     badgeElement.style.display = 'none';
-
-    // Hide the toast if no new blog
     toastElement.style.display = 'none';
   }
-  
-  // Optionally update the browser tab (favicon or title)
-  updateAppBadge(isNewBlogAvailable, newBlogCount);  // Pass the new blog count to updateAppBadge
+
+  updateAppBadge(isNewBlogAvailable, newBlogCount);
 }
 
-// Function to update the favicon or title for the badge
+// ✅ Function to update favicon or title badge
 function updateAppBadge(isNewBlogAvailable, newBlogCount) {
   if (isNewBlogAvailable) {
-    document.title = `${newBlogCount} New Blogs`;  // Using the new blog count
+    document.title = `${newBlogCount} New Blogs`;
   } else {
-    document.title = "Caredesk";  // Reset title
+    document.title = "Caredesk";
   }
 }

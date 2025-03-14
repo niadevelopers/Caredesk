@@ -12,14 +12,17 @@ style.textContent = `
     left: 50%; /* Center horizontally */
     transform: translate(-50%, -50%); /* Adjust for centering */
     z-index: 9999; /* Keep on top of other content */
+    background-color: rgba(0, 0, 0, 0.8); /* Dark background for contrast */
+    padding: 20px; /* Add padding */
+    border-radius: 10px; /* Rounded corners */
 }
 
 .dot {
-    width: 10px; /* Initial size of dots */
-    height: 10px;
+    width: 12px; /* Increased initial size of dots */
+    height: 12px;
     background-color: white; /* Dot color */
     border-radius: 50%; /* Make dots circular */
-    margin: 5px; /* Space between dots */
+    margin: 0 5px; /* Horizontal space between dots */
     animation: dot-blink 1.5s infinite; /* Apply blinking animation */
 }
 

@@ -167,10 +167,23 @@ function renderLoadMoreButton(category, nextPage) {
 
 
 searchBar.addEventListener('input', () => {
-  const query = searchBar.value.toLowerCase();
+  const query = searchBar.value.toLowerCase().trim();
+
+  if (query === "") {
+    displayBlogs(blogs); // If search is empty, show all blogs
+    return;
+  }
+
+  const keywords = query.split(/\s+/); // Split input into words
+
+  // ✅ Filter blogs where *any* keyword appears in the title or content
   const filteredBlogs = blogs.filter(blog =>
-    blog.title.toLowerCase().includes(query)
+    keywords.some(keyword =>
+      blog.title.toLowerCase().includes(keyword) ||
+      blog.content.toLowerCase().includes(keyword)
+    )
   );
+
   displayBlogs(filteredBlogs);
 });
 

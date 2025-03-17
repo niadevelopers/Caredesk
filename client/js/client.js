@@ -101,7 +101,7 @@ function displayBlogs(blogsToDisplay, append = false) {
           <button onclick="window.location.href='comments.html?blogId=${blog._id}'">💬 Comments</button>
           <button onclick="shareBlog('${blog._id}')">🔗 Share</button>
         </div>
-        <!--<span class="category">${blog.category}</span>-->
+        <span class="category">${blog.category}</span>
       </div>
     `;
   }).join('');

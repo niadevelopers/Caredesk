@@ -43,12 +43,49 @@
     <priority>0.90</priority>
   </url>
 
-  <!-- Blog Page -->
+ 
+  <!-- Blog URLs -->
   <url>
-    <loc>https://caredesk.site/blog.html</loc>
-    <lastmod>2025-03-10T12:37:04+00:00</lastmod>
+    <loc>https://caredesk.site/blog.html?id=67dc6b887158a0cc4bd55b40</loc>
+    <lastmod>2025-03-21</lastmod>
     <changefreq>daily</changefreq>
-    <priority>1.0</priority>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://caredesk.site/blog.html?id=67dc62c67158a0cc4bd55b2b</loc>
+    <lastmod>2025-03-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://caredesk.site/blog.html?id=67d9a93972661cbebba74747</loc>
+    <lastmod>2025-03-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://caredesk.site/blog.html?id=67d8403c0aab8b121411fddd</loc>
+    <lastmod>2025-03-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://caredesk.site/blog.html?id=67d7da9ff7b222fe49c26ffd</loc>
+    <lastmod>2025-03-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://caredesk.site/blog.html?id=67d57b5b703914c338604aca</loc>
+    <lastmod>2025-03-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://caredesk.site/blog.html?id=67d5688c703914c338604a77</loc>
+    <lastmod>2025-03-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
   </url>
 
 </urlset>
